@@ -32,7 +32,7 @@ def main():
                             row['system_id'] = dw.system_dimension.ensure(row)
                             station_id = dw.station_dimension.ensure(row, mappings)
                             row = dw.station_dimension.getbykey(station_id)
- 
+
                             dw.start_station_dimension.ensure(row, namemapping={
                                 'start_station_short_name': 'short_name',
                                 'start_station_name': 'name',
