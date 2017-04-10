@@ -7,6 +7,7 @@ import os
 import time
 from dateutil import parser
 from pygrametl.datasources import CSVSource
+import pygrametl
 from model.DW import DW
 from settings import settings
 
@@ -20,7 +21,8 @@ def main():
     data_dir = os.path.join(cfg['ingestion_settings']['data_directory'])
 
     # for each system in the config file
-    for source in cfg['datasources'].keys():
+    # for source in cfg['datasources'].keys():
+    for source in ['healthyride']:
         trip_dir = os.path.join(data_dir, source, cfg['ingestion_settings']['trips_directory'])
         mappings = cfg['datasources'][source]['trip_fields']
 
@@ -45,12 +47,11 @@ def main():
 
                                 fix_mappings(row, mappings)
                                 insert_datetime_dimensions(row)
+                                # insert_missing_fields(row)
+                                insert_customer_dimensions(row)
                                 row['bike_id'] = dw.bike_dimension.ensure(row)
                                 row['start_station_id'] = dw.start_station_dimension.ensure(row)
                                 row['end_station_id'] = dw.end_station_dimension.ensure(row)
-                                row['customer_gender_id'] = dw.customer_gender_dimension.ensure(row)
-                                row['customer_birthyear_id'] = dw.customer_birthyear_dimension.ensure(row)
-                                row['customer_type_id'] = dw.customer_type_dimension.ensure(row)
 
                                 dw.trip_fact_table.insert(row)
 
@@ -82,6 +83,18 @@ def insert_datetime_dimensions(row):
     row['start_date_id'] = dw.start_date_dimension.ensure(row)
     row['start_time_id'] = dw.start_time_dimension.ensure(row)
     row['end_time_id'] = dw.end_time_dimension.ensure(row)
+
+
+def insert_customer_dimensions(row):
+    defaults = [
+        ('customer_gender', 'unspecified'),
+        ('customer_birthyear', -1),
+        ('customer_type', 'unspecified')
+    ]
+    pygrametl.setdefaults(row, defaults)
+    row['customer_gender_id'] = dw.customer_gender_dimension.ensure(row)
+    row['customer_birthyear_id'] = dw.customer_birthyear_dimension.ensure(row)
+    row['customer_type_id'] = dw.customer_type_dimension.ensure(row)
 
 
 def fix_mappings(row, mappings):
