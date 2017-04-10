@@ -47,10 +47,7 @@ def main():
                         'end_station_capacity': 'capacity'
                     })
 
-
-
                 dw.get_db_connection().commit()
-
 
 
 if __name__ == "__main__": main()

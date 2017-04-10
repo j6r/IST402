@@ -4,6 +4,8 @@
 
 from pygrametl.tables import Dimension, FactTable
 from pygrametl import ConnectionWrapper
+import pygrametl
+from dateutil import parser
 from util import util
 
 
@@ -72,29 +74,33 @@ class DW:
         self.start_date_dimension = Dimension(
             name='start_date',
             key='start_date_id',
-            attributes=['start_year', 'start_month', 'start_day', 'start_day_of_week'],
-            lookupatts=['start_year', 'start_month', 'start_day']
+            attributes=['start_year', 'start_month', 'start_day', 'start_day_of_week', 'start_date_string'],
+            lookupatts=['start_date_string'],
+            rowexpander=start_date_row_expander
         )
 
         self.end_date_dimension = Dimension(
             name='end_date',
             key='end_date_id',
-            attributes=['end_year', 'end_month', 'end_day', 'end_day_of_week'],
-            lookupatts=['end_year', 'end_month', 'end_day']
+            attributes=['end_year', 'end_month', 'end_day', 'end_day_of_week', 'end_date_string'],
+            lookupatts=['end_date_string'],
+            rowexpander=end_date_row_expander
         )
 
         self.start_time_dimension = Dimension(
             name='start_time',
             key='start_time_id',
-            attributes=['start_hour', 'start_minute'],
-            lookupatts=['start_hour', 'start_minute']
+            attributes=['start_hour', 'start_minute', 'start_time_string', 'start_time_of_day'],
+            lookupatts=['start_time_string'],
+            rowexpander=start_time_row_expander
         )
 
         self.end_time_dimension = Dimension(
             name='end_time',
             key='end_time_id',
-            attributes=['end_hour', 'end_minute'],
-            lookupatts=['end_hour', 'end_minute']
+            attributes=['end_hour', 'end_minute', 'end_time_string', 'end_time_of_day'],
+            lookupatts=['end_time_string'],
+            rowexpander=end_time_row_expander
         )
 
         # Trips
@@ -103,7 +109,7 @@ class DW:
             name='trips',
             measures=['duration_s'],
             keyrefs=['system_id', 'start_station_id', 'end_station_id', 'start_date_id', 'end_date_id', 'start_time_id',
-                     'end_time_id', 'customer_birthyear_id', 'customer_gender_id', 'customer_type_id']
+                     'end_time_id', 'customer_birthyear_id', 'customer_gender_id', 'customer_type_id', 'bike_id']
         )
 
         # weather fact table and date dimension
@@ -192,3 +198,57 @@ class DW:
     #     key='station_status_id',
     #     keyrefs=['station_status_date_id', 'station_status_time_id', 'station_status_station_id']
     # )
+
+
+def end_date_row_expander(row, namemapping):
+    d = parser.parse(row['end_date_string'])
+    row['end_year'] = d.year
+    row['end_month'] = d.month
+    row['end_day'] = d.day
+    row['end_day_of_week'] = d.isoweekday()
+    row['end_date_string'] = row['end_date_string']
+    return row
+
+
+def start_date_row_expander(row, namemapping):
+    d = parser.parse(row['start_date_string'])
+    row['start_year'] = d.year
+    row['start_month'] = d.month
+    row['start_day'] = d.day
+    row['start_day_of_week'] = d.isoweekday()
+    row['start_date_string'] = row['start_date_string']
+    return row
+
+
+def start_time_row_expander(row, namemapping):
+    d = parser.parse(row['start_time_string'])
+    row['start_hour'] = d.hour
+    row['start_minute'] = d.minute
+    row['start_time_of_day'] = get_time_of_day(row['start_hour'])
+    return row
+
+
+def end_time_row_expander(row, namemapping):
+    d = parser.parse(row['end_time_string'])
+    row['end_hour'] = d.hour
+    row['end_minute'] = d.minute
+    row['end_time_of_day'] = get_time_of_day(row['end_hour'])
+    return row
+
+
+def get_time_of_day(hour):
+    """
+    Determines the time of day by hour
+    :param hour: hour of day
+    :return: time of day from early morning, morning, afternoon, evening
+    """
+    if hour < 7:
+        return 'early_morning'
+    elif hour < 12:
+        return 'morning'
+    elif hour < 6:
+        return 'afternoon'
+    else:
+        return 'evening'
+
+

@@ -84,7 +84,8 @@ create table trips(
     end_time_id integer,
     customer_birthyear_id integer,
     customer_type_id integer,
-    customer_gender_id integer
+    customer_gender_id integer,
+    bike_id integer
 );
 
 create table weather(

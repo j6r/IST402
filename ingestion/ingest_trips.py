@@ -1,9 +1,10 @@
 """
-    Ingest trip data
+    Ingest trip data into the staging database.
 """
 
-
+import logging
 import os
+import time
 from dateutil import parser
 from pygrametl.datasources import CSVSource
 from model.DW import DW
@@ -11,11 +12,10 @@ from settings import settings
 
 cfg = settings.get_config()
 dw = DW()
+logging.basicConfig(level=logging.DEBUG)
 
 
 def main():
-
-    # Insert "unknown" row for optional keyrefs
 
     data_dir = os.path.join(cfg['ingestion_settings']['data_directory'])
 
@@ -36,7 +36,7 @@ def main():
                     if file.endswith('.csv'):
                         with open(os.path.join(trip_dir, file), 'r') as fh:
                             data = CSVSource(fh)
-                            print('Processing ' + file)
+                            logging.info("Processing " + file)
 
                             # Process each row
                             for row in data:
@@ -45,24 +45,21 @@ def main():
 
                                 fix_mappings(row, mappings)
                                 insert_datetime_dimensions(row)
-                                insert_missing_fields(row)
-                                dw.bike_dimension.ensure(row)
+                                row['bike_id'] = dw.bike_dimension.ensure(row)
+                                row['start_station_id'] = dw.start_station_dimension.ensure(row)
+                                row['end_station_id'] = dw.end_station_dimension.ensure(row)
+                                row['customer_gender_id'] = dw.customer_gender_dimension.ensure(row)
+                                row['customer_birthyear_id'] = dw.customer_birthyear_dimension.ensure(row)
+                                row['customer_type_id'] = dw.customer_type_dimension.ensure(row)
 
-                                # TODO: pygrametl calls ensure before remapping keys?
-                                # We have to get the stations key here instead of pygrametl doing it automatically
-                                row['start_station_id'] = dw.start_station_dimension.lookup({
-                                    'system_id': row['system_id'],
-                                    'start_station_short_name': row['start_station_short_name']
-                                })
-                                row['end_station_id'] = dw.end_station_dimension.lookup({
-                                    'system_id': row['system_id'],
-                                    'end_station_short_name': row['end_station_short_name']
-                                })
+                                dw.trip_fact_table.insert(row)
 
-                                dw.trip_fact_table.ensure(row)
+                            logging.info('Completed processing ' + file)
+                            dw.get_db_connection().commit()
 
-                except IndentationError as e:
-                    print(e)
+                except Exception as e:
+                    logging.exception('Exception occurred while parsing: ' + file,
+                                      exc_info=True)
 
 
 def insert_datetime_dimensions(row):
@@ -73,63 +70,31 @@ def insert_datetime_dimensions(row):
     :return: none, row is updated
     """
 
-    datetime_row = {}
-
-    # start date and time
     d = parser.parse(row['time_start'])
-
-    datetime_row['start_date_string'] = d.strftime('yyyy-MM-dd')
-    datetime_row['start_year'] = d.year
-    datetime_row['start_month'] = d.month
-    datetime_row['start_day'] = d.day
-    datetime_row['start_day_of_week'] = d.isoweekday()
-    datetime_row['start_hour'] = d.hour
-    datetime_row['start_minute'] = d.minute
-    datetime_row['start_time_of_day'] = get_time_of_day(datetime_row['start_hour'])
-
-    # end date and time
+    row['start_date_string'] = d.strftime('%Y-%m-%d')
+    row['start_time_string'] = d.strftime('%H:%M')
     d = parser.parse(row['time_stop'])
-    datetime_row['end_date_string'] = d.strftime('yyyy-MM-dd')
-    datetime_row['end_year'] = d.year
-    datetime_row['end_month'] = d.month
-    datetime_row['end_day'] = d.day
-    datetime_row['end_day_of_week'] = d.isoweekday()
-    datetime_row['end_hour'] = d.hour
-    datetime_row['end_minute'] = d.minute
-    datetime_row['end_time_of_day'] = get_time_of_day(datetime_row['end_hour'])
+    row['end_date_string'] = d.strftime('%Y-%m-%d')
+    row['end_time_string'] = d.strftime('%H:%M')
 
     # update dimensions
-
-    row['start_date_id'] = dw.start_date_dimension.ensure(datetime_row)
-    row['start_time_id'] = dw.start_time_dimension.ensure(datetime_row)
-    row['end_date_id'] = dw.end_date_dimension.ensure(datetime_row)
-    row['end_time_id'] = dw.end_time_dimension.ensure(datetime_row)
-
-
-def get_time_of_day(hour):
-    """
-    Determines the time of day by hour
-    :param hour: hour of day
-    :return: time of day from early morning, morning, afternoon, evening
-    """
-    if hour < 7:
-        return 'early_morning'
-    elif hour < 12:
-        return 'morning'
-    elif hour < 6:
-        return 'afternoon'
-    else:
-        return 'evening'
+    row['end_date_id'] = dw.end_date_dimension.ensure(row)
+    row['start_date_id'] = dw.start_date_dimension.ensure(row)
+    row['start_time_id'] = dw.start_time_dimension.ensure(row)
+    row['end_time_id'] = dw.end_time_dimension.ensure(row)
 
 
 def fix_mappings(row, mappings):
     """
-    Sets the field mappings for each file.
-    Some of the bike share systems don't have consistent headings and file formats in all of the data files, so we
-     need to detect and correct as needed.
-    :param csvfile: the csv data source
-    :param file_mappings: known field mappings for the system
-    :return: updates the csvfile in place
+    Standardizes field names
+
+    Some of the bike share systems don't have consistent headings and file formats
+    in all of the data files, so we need to detect and correct as needed. This
+    situation also prevents the use of pygrametl's namemapping function.
+
+    :param row: data row
+    :param mappings: known field mappings for the system
+    :return: updates the row in place
     """
 
     for k in mappings:
@@ -138,11 +103,17 @@ def fix_mappings(row, mappings):
 
 
 def insert_missing_fields(row):
+    """
+    Inserts missing keyrefs.
+
+    Bike share systems do not include all fields in their data. This method inserts
+    keys for missing lookuprefs in the trips fact table.
+    :param row: data row
+    :return: updates the row in place
+    """
     for k in dw.trip_fact_table.keyrefs:
         if k not in row:
             row[k] = -1
-
-
 
 
 if __name__ == '__main__': main()
