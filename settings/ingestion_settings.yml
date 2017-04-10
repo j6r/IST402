@@ -63,8 +63,8 @@ datasources:
       Stoptime: time_stop
       Bikeid: bike_name
       Tripduration: duration_s
-      'From station id': start_station_short_name
-      'To station id': end_station_short_name
+      From station id: start_station_short_name
+      To station id: end_station_short_name
       Usertype: customer_type
 
   divvy:
