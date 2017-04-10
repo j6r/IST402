@@ -1,6 +1,6 @@
 ingestion_settings:
   staging_db_location: '/Users/redjen/Desktop/IST402.db'
-  data_directory: '/Users/redjen/Desktop/data'
+  data_directory: '/Users/redjen/Box Sync/IST402/data/raw/bike share/'
 
 google_api:
   api_key: AIzaSyBH8xwLWayzTQzSo2WD-g_aeKvLyzOTmN4

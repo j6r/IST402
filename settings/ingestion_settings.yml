@@ -4,148 +4,148 @@ google_api:
 ingestion_settings:
   staging_db_location: '../data/staging.db'
   data_directory: '../data'
+  station_file_name: stations.csv
+  trips_directory: trips
 
-  database_model:
-    trips_table: trips
-    trips_path: trips
-    trip_columns:
-      - system_trip_id
-      - system_id
-      - from_station_id
-      - to_station_id
-      - time_start
-      - time_stop
-      - bike_name
-      - duration_s
-      - usertype
-      - gender
-      - birthyear
 
-    stations_table: stations
-    station_file_name: stations.csv
-    station_columns:
-      - system_id
-      - short_name
-      - name
-      - latitude
-      - longitude
-      - date_installed
-      - capacity_initial
-      - date_modified
-      - capacity
-      - date_decommissioned
+# Lists data sources and field mappings.
+#
+# Caution: station headers are mapped FROM standard names TO data file names but
+# trip mapping are FROM data file names TO standard names. See ingests_trips.py.
 
-  datasources:
-    pronto:
-      system_id: pronto
+datasources:
+  pronto:
+    system_id: pronto
+    weather_station: 'GHCND:USW00094290'
 
-      station_fields:
-        station_id: short_name
-        lat: latitude
-        long: longitude
-        install_date: date_installed
-        install_dockcount: capacity_initial
-        modification_date: date_modified
-        current_dockcount: capacity
-        decommission_date: date_decommissioned
+    station_fields:
+      short_name: station_id
+      latitude: lat
+      longitude: long
+      date_installed: install_date
+      capacity_initial: install_dockcount
+      date_modified: modification_date
+      capacity: current_dockcount
+      date_decommissioned: decommission_date
+      elevation: missing
 
-      trip_fields:
-        trip_id: system_trip_id
-        starttime: time_start
-        stoptime: time_stop
-        bikeid: bike_name
-        tripduration: duration_s
-        from_station_id: from_station_id
-        to_station_id: to_station_id
+    trip_fields:
+      trip_id: system_trip_id
+      starttime: time_start
+      stoptime: time_stop
+      bikeid: bike_name
+      tripduration: duration_s
+      from_station_id: start_station_short_name
+      to_station_id: end_station_short_name
+      gender: customer_gender
+      usertype: customer_type
+      birthyear: customer_birthyear
 
-      user_type_mapping:
-        pass: Short-Term Pass Holder
-        member: Member
+    user_type_mapping:
+      Short-Term Pass Holder: customer
+      Member: subscriber
 
-    healthyride:
-      system_id: healthyride
+  healthyride:
+    system_id: healthyride
+    weather_station: 'GHCND:USW00014762'
 
-      station_fields:
-        StationNum: short_name
-        StationName: name
-        RackQnty: capacity
-        Latitude: latitude
-        Longitude: longitude
+    station_fields:
+      short_name: 'Station #'
+      name: Station Name
+      capacity: '# of Racks'
+      latitude: Latitude
+      longitude: Longitude
+      elevation: missing
 
-      trip_fields:
-        "Trip id": system_trip_id
-        Starttime: time_start
-        Stoptime: time_stop
-        Bikeid: bike_name
-        Tripduration: duration_s
-        'From station id': from_station_id
-        'To station id': to_station_id
-        Usertype: usertype
+    trip_fields:
+      "Trip id": system_trip_id
+      Starttime: time_start
+      Stoptime: time_stop
+      Bikeid: bike_name
+      Tripduration: duration_s
+      'From station id': start_station_short_name
+      'To station id': end_station_short_name
+      Usertype: customer_type
 
-    divvy:
-      system_id: divvy
+  divvy:
+    system_id: divvy
+    weather_station: 'GHCND:USW00014819'
 
-      station_fields:
-        id: short_name
-        dpcapacity: capacity
-        online_date: date_installed
+    station_fields:
+      short_name: id
+      capacity: dpcapacity
+      date_installed: online_date
+      elevation: missing
 
-      trip_fields:
-        trip_id: system_trip_id
-        starttime: time_start
-        stoptime: time_stop
-        bikeid: bike_name
-        tripduration: duration_s
-        from_station_id: from_station_id
-        to_station_id: to_station_id
-        birthday: birthyear
+    trip_fields:
+      trip_id: system_trip_id
+      '"trip_id"': system_trip_id
+      starttime: time_start
+      '"starttime"': time_start
+      stoptime: time_stop
+      '"stoptime"': time_stop
+      bikeid: bike_name
+      '"bikeid"': bike_name
+      tripduration: duration_s
+      '"tripduration"': duration_s
+      from_station_name: start_station_short_name
+      '"from_station_name"': start_station_short_name
+      to_station_name: end_station_short_name
+      '"to_station_name"': end_station_short_name
+      birthday: birthyear
+      usertype: customer_type
+      '"usertype"': customer_type
 
-      user_type_mappings:
-        pass: Customer
-        member: Subscriber
 
-    bike_chattanooga:
-      system_id: bike_chattanooga
+  bike_chattanooga:
+    system_id: bike_chattanooga
+    weather_station: 'GHCND:USW00013882'
 
-      station_fields:
-        StationID: short_name
-        Address: name
-        Latitude: latitude
-        Longitude: longitude
+    station_fields:
+      short_name: StationID
+      name: Address
+      latitude: Latitude
+      longitude: Longitude
+      capacity: missing
+      elevation: missing
 
-      trip_fields:
-        MemberType: usertype
-        TripDurationSec: duration_s
-        BikeID: bike_name
-        StartDateTime: time_start
-        StartStationID: from_station_id
-        EndDateTime: time_stop
-        EndStationID: to_station_id
+    trip_fields:
+      MemberType: usertype
+      TripDurationSec: duration_s
+      BikeID: bike_name
+      StartDateTime: time_start
+      StartStationID: start_station_short_name
+      EndDateTime: time_stop
+      EndStationID: end_station_short_name
+      'MemberType': customer_type
 
-      user_type_mappings:
-        pass: Customer
-        member: Subscriber
+  babs:
+    system_id: babs
 
-    babs:
-      system_id: babs
+    station_fields:
+      short_name: station_id
+      latitude: lat
+      longitude: long
+      capacity: dockcount
+      date_installed: installation
+      elevation: missing
 
-      station_fields:
-        station_id: short_name
-        lat: latitude
-        long: longitude
-        dockcount: capacity
-        installation: date_installed
+    trip_fields:
+      Duration: duration_s
+      Start Date: time_start
+      Start Terminal: start_station_short_name
+      End Date: time_stop
+      End Terminal: end_station_short_name
+      'Bike #': bike_name
+      Subscription Type: customer_type
+      Subscriber Type: customer_type
 
-      trip_fields:
-        Duration: duration_s
-        Start Date: time_start
-        Start Terminal: from_station_id
-        End Date: time_stop
-        End Terminal: to_station_id
-        'Bike #': bike_name
-        Subscription Type: usertype
-        Subscriber Type: usertype
 
-      user_type_mappings:
-        pass: Customer
-        member: Subscriber
+weather:
+  weather_data_dir: '../weather'
+  weather_mappings:
+    precipitation_in: PRCP
+    snow_in: SNOW
+    temp_min_f: TMIN
+    temp_max_f: TMAX
+    wind_mph: AWND
