@@ -21,17 +21,18 @@ def main():
 
             for file in os.listdir(stations_dir):
                 if file.endswith('.csv'):
+                    print('Processing ' + source + ' ' + file)
 
                     with open(os.path.join(stations_dir, file), 'r') as fh:
 
                         station_data = CSVSource(fh)
 
                         for row in station_data:
-                            row['missing'] = None
+                            fix_mappings(row, mappings)
+                            if 'capacity' not in row.keys():
+                                row['capacity'] = -1
                             row['system_name'] = source
                             row['system_id'] = dw.system_dimension.ensure(row)
-                            station_id = dw.station_dimension.ensure(row, mappings)
-                            row = dw.station_dimension.getbykey(station_id)
 
                             dw.start_station_dimension.ensure(row, namemapping={
                                 'start_station_short_name': 'short_name',
@@ -51,5 +52,22 @@ def main():
 
                         dw.get_db_connection().commit()
 
+
+def fix_mappings(row, mappings):
+    """
+    Standardizes field names
+
+    Some of the bike share systems don't have consistent headings and file formats
+    in all of the data files, so we need to detect and correct as needed. This
+    situation also prevents the use of pygrametl's namemapping function.
+
+    :param row: data row
+    :param mappings: known field mappings for the system
+    :return: updates the row in place
+    """
+
+    for k in mappings:
+        if k in row.keys():
+            row[mappings[k]] = row.pop(k)
 
 if __name__ == "__main__": main()

@@ -19,15 +19,14 @@ datasources:
     weather_station: 'GHCND:USW00094290'
 
     station_fields:
-      short_name: station_id
-      latitude: lat
-      longitude: long
-      date_installed: install_date
-      capacity_initial: install_dockcount
-      date_modified: modification_date
-      capacity: current_dockcount
-      date_decommissioned: decommission_date
-      elevation: missing
+      station_id: short_name
+      lat: latitude
+      long: longitude
+      install_date: date_installed
+      install_dockcount: capacity_initial
+      modification_date: date_modified
+      current_dockcount: capacity
+      decommission_date: date_decommissioned
 
     trip_fields:
       trip_id: system_trip_id
@@ -50,12 +49,14 @@ datasources:
     weather_station: 'GHCND:USW00014762'
 
     station_fields:
-      short_name: 'Station #'
-      name: Station Name
-      capacity: '# of Racks'
-      latitude: Latitude
-      longitude: Longitude
-      elevation: missing
+      'Station #': short_name
+      Station Name: name
+      '# of Racks': capacity
+      Latitude: latitude
+      Longitude: longitude
+      StationNum: short_name
+      StationName: name
+      RackQnty: capacity
 
     trip_fields:
       "Trip id": system_trip_id
@@ -72,10 +73,9 @@ datasources:
     weather_station: 'GHCND:USW00014819'
 
     station_fields:
-      short_name: id
-      capacity: dpcapacity
-      date_installed: online_date
-      elevation: missing
+      id: short_name
+      dpcapacity: capacity
+      online_date: date_installed
 
     trip_fields:
       trip_id: system_trip_id
@@ -102,12 +102,10 @@ datasources:
     weather_station: 'GHCND:USW00013882'
 
     station_fields:
-      short_name: StationID
-      name: Address
-      latitude: Latitude
-      longitude: Longitude
-      capacity: missing
-      elevation: missing
+      StationID: short_name
+      Address: name
+      Latitude: latitude
+      Longitude: longitude
 
     trip_fields:
       MemberType: usertype
@@ -123,12 +121,11 @@ datasources:
     system_id: babs
 
     station_fields:
-      short_name: station_id
-      latitude: lat
-      longitude: long
-      capacity: dockcount
-      date_installed: installation
-      elevation: missing
+      station_id: short_name
+      lat: latitude
+      long: longitude
+      dockcount: capacity
+      installation: date_installed
 
     trip_fields:
       Duration: duration_s
