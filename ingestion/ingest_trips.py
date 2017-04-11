@@ -15,7 +15,14 @@ from settings import settings
 
 cfg = settings.get_config()
 dw = DW()
-logging.basicConfig(filename='/Users/redjen/Desktop/trips_ingestion.log', level=logging.DEBUG)
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%m-%d %H:%M',
+                    filename=cfg['log'],
+                    filemode='w')
+bad_data_log = logging.FileHandler(filename=cfg['bad_data_log'])
+bad_data_log.setLevel(logging.DEBUG)
 
 
 def main():
@@ -40,57 +47,53 @@ def main():
 
             # for every file in the trip directory
             for file in os.listdir(trip_dir):
+                if file.endswith('.csv'):
 
-                # Abandon the current file if a parsing exception occurs and move on to the next
-                try:
+                    with open(os.path.join(trip_dir, file), 'r') as fh:
+                        data = CSVSource(fh)
+                        logging.info("Processing " + file)
 
-                    if file.endswith('.csv'):
-                        with open(os.path.join(trip_dir, file), 'r') as fh:
-                            data = CSVSource(fh)
-                            logging.info("Processing " + file)
+                        file_rowcount = 0
+                        file_start_time = time.time()
+                        set_rowcount = 0
+                        set_start_time = time.time()
 
-                            file_rowcount = 0
-                            file_start_time = time.time()
-                            set_rowcount = 0
-                            set_start_time = time.time()
-
-                            # Process each row
-                            for row in data:
+                        # Process each row
+                        for row in data:
+                            try:
                                 row['system_name'] = source
                                 row['system_id'] = dw.system_dimension.ensure(row)
 
                                 fix_mappings(row, mappings)
                                 insert_datetime_dimensions(row)
-                                insert_missing_fields(row)
+                                # insert_missing_fields(row)
                                 insert_customer_dimensions(row)
 
                                 row['bike_id'] = dw.bike_dimension.ensure(row)
                                 row['start_station_id'] = dw.start_station_dimension.ensure(row)
                                 row['end_station_id'] = dw.end_station_dimension.ensure(row)
-
                                 dw.trip_fact_table.insert(row)
+                                dw.get_db_connection().commit()
+
+                            except (ValueError, KeyError) as e:
+                                logging.debug(
+                                    'Parsing failed due to bad value on row {:.0f} in file {}\n{}\n'.format(
+                                        file_rowcount, file, row))
+                            finally:
                                 set_rowcount += 1
                                 file_rowcount += 1
                                 source_rowcout += 1
                                 overall_row_count += 1
-
                                 if set_rowcount == 1000:
                                     log_time_row(set_start_time, set_rowcount)
                                     set_rowcount = 0
                                     set_start_time = time.time()
 
-                            logging.info('\nCompleted processing ' + file)
-                            log_time_row(file_start_time, file_rowcount)
+                        logging.info('\nCompleted processing ' + file)
+                        log_time_row(file_start_time, file_rowcount)
 
-                except ValueError as e:
-                    logging.critical('Parsing failed due to bad value on row {:.0f} in file {}\n{}'.format(file_rowcount, file, row))
-                except Exception as e:
-                    logging.critical('Parsing failed on row {:.0f} in file {}\n{}'.format(file_rowcount, file, row))
-                    logging.exception('Exception occurred while parsing: ' + file,
-                                      exc_info=True)
-
-            logging.info('\nFinished processing ' + source)
-            log_time_row(source_rowcout, source_start_time)
+        logging.info('\nFinished processing ' + source)
+        log_time_row(source_rowcout, source_start_time)
 
     logging.info('\n\n\nCompleted ingestion of trip data')
     log_time_row(overall_start_time, overall_row_count)
