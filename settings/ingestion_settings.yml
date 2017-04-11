@@ -88,10 +88,12 @@ datasources:
       '"bikeid"': bike_name
       tripduration: duration_s
       '"tripduration"': duration_s
-      from_station_name: start_station_short_name
-      '"from_station_name"': start_station_short_name
-      to_station_name: end_station_short_name
-      '"to_station_name"': end_station_short_name
+      from_station_name: start_station_name
+      '"from_station_name"': start_station_name
+      to_station_name: end_station_name
+      '"to_station_name"': end_station_name
+      from_station_id: start_station_short_name
+      to_station_id: end_station_short_name
       birthday: birthyear
       usertype: customer_type
       '"usertype"': customer_type
