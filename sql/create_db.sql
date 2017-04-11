@@ -88,21 +88,6 @@ create table trips(
     bike_id integer
 );
 
-create table weather(
-    weather_id integer primary key,
-    system_id integer,
-    precipitation_in real,
-    snow_in real,
-    temp_min_f real,
-    temp_max_f real,
-    temp_avg_f real,
-    wind_mph real,
-    weather_date_string text,
-    weather_year integer,
-    weather_month integer,
-    weather_day integer
-);
-
 create table customer_gender(
     customer_gender_id integer primary key,
     customer_gender text
@@ -126,3 +111,82 @@ create table bikes(
     system_id integer,
     bike_name text
 );
+
+
+/*
+ * WEATHER
+ */
+
+
+create table weather(
+    weather_id integer primary key,
+    system_id integer,
+    precipitation_in real,
+    snow_in real,
+    temp_min_f real,
+    temp_max_f real,
+    temp_avg_f real,
+    wind_mph real,
+    weather_date_string text,
+    weather_year integer,
+    weather_month integer,
+    weather_day integer
+);
+
+/*
+ * VIEWS
+ */
+
+-- Weather with system name
+create view weather_system as
+select w.*, s.system_name
+from weather w left join system s on w.system_id=s.system_id;
+
+-- TODO all data for all trips
+
+
+/*
+ * AGGREGATION VIEWS
+ */
+
+
+-- Daily trips counts by system without weather
+create view aggregate_system_daily_trips as
+select t.system_id,
+    s.system_name,
+    count(*) as 'count',
+    sd.start_date_string as 'date_string',
+    sd.start_year as 'year',
+    sd.start_month as 'month',
+    sd.start_day as 'day',
+    sd.start_day_of_week as 'day_of_week',
+    w.precipitation_in,
+    w.snow_in,
+    w.temp_avg_f,
+    w.temp_max_f,
+    w.temp_min_f,
+    w.wind_mph
+from trips t left join start_date sd on t.start_date_id=sd.start_date_id
+    left join system s on t.system_id=s.system_id
+    left join weather w on t.system_id=w.system_id and sd.start_date_string=w.weather_date_string
+group by t.system_id, t.start_date_id
+order by t.system_id, sd.start_date_string;
+
+
+-- Daily counts for trips between pairs of stations
+create view aggregation_station_pairs_daily_trips as
+select system_name, start_station_short_name, end_station_short_name, count(*) as 'count',
+    sd.start_date_string as 'date',
+    sd.start_year as 'year',
+    sd.start_month as 'month',
+    sd.start_day as 'day',
+    sd.start_day_of_week as 'day_of_week',
+    ss.start_station_latitude, ss.start_station_longitude, ss.start_station_elevation,
+    es.end_station_latitude, es.end_station_longitude, es.end_station_elevation,
+    w.precipitation_in, w.snow_in, w.temp_avg_f, w.temp_max_f, w.temp_min_f,w.wind_mph
+from trips t left join system s on t.system_id=s.system_id
+    left join start_station ss on t.start_station_id=ss.start_station_id
+    left join end_station es on t.end_station_id=es.end_station_id
+    left join start_date sd on t.start_date_id=sd.start_date_id
+    left join weather w on t.system_id=w.system_id and sd.start_date_string=w.weather_date_string
+group by t.start_station_id, t.end_station_id, t.start_date_id;

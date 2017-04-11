@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
     Ingest trip data into the staging database.
 """
@@ -80,7 +82,10 @@ def main():
                             logging.info('\nCompleted processing ' + file)
                             log_time_row(file_start_time, file_rowcount)
 
+                except ValueError as e:
+                    logging.critical('Parsing failed due to bad value on row {:.0f} in file {}\n{}'.format(file_rowcount, file, row))
                 except Exception as e:
+                    logging.critical('Parsing failed on row {:.0f} in file {}\n{}'.format(file_rowcount, file, row))
                     logging.exception('Exception occurred while parsing: ' + file,
                                       exc_info=True)
 
@@ -161,7 +166,7 @@ def log_time_row(time_begin, num_rows):
     elapsed = time.time() - time_begin
     avg_row = elapsed / num_rows
     logging.info(
-        "Processed {:d} rows, {:.2f} s, {:.4f} per row".format(num_rows, elapsed, avg_row)
+        "Processed {:.0f} rows, {:.2f}s, {:.4f}s per row".format(num_rows, elapsed, avg_row)
     )
 
 
