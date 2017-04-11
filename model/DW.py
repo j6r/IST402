@@ -115,7 +115,8 @@ class DW:
         self.bike_dimension = Dimension(
             name='bikes',
             key='bike_id',
-            attributes=['system_id', 'bike_name']
+            attributes=['system_id', 'bike_name'],
+            lookupatts=['system_id', 'bike_name']
         )
 
         self.customer_gender_dimension = Dimension(
@@ -142,20 +143,6 @@ class DW:
             defaultidvalue=-1
         )
 
-
-    # trips_aggregate_station_daily_fact_table = FactTable(
-    #     name='trips_aggregate_station_daily',
-    #     measures='num_trips',
-    #     keyrefs=['from_station_id', 'to_station_id', 'start_date_id']
-    # )
-
-    #trips_aggregate_system_daily_fact_table = FactTable(
-    #     name='trips_aggregate_station_daily',
-    #     measures='num_trips',
-    #     keyrefs=['from_station_id', 'to_station_id']
-    # )
-    #
-    #
     # # Station status data
     # station_status__date_dimension = Dimension(
     #     name='station_status_date',
