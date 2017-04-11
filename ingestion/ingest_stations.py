@@ -31,7 +31,7 @@ def main():
 
                         for row in station_data:
                             fix_mappings(row, mappings)
-                            if 'station_id' in row.keys():
+                            if 'short_name' in row.keys():
                                 if 'capacity' not in row.keys():
                                     row['capacity'] = -1
                                 row['system_name'] = source

@@ -104,7 +104,6 @@ datasources:
       gender: customer_gender
       '"gender"': customer_gender
 
-
   bike_chattanooga:
     system_id: bike_chattanooga
     weather_station: 'GHCND:USW00013882'
@@ -144,6 +143,28 @@ datasources:
       'Bike #': bike_name
       Subscription Type: customer_type
       Subscriber Type: customer_type
+
+  indego:
+    system_id: indego
+
+    station_fields:
+      Station ID: station_short_name
+      Station Name: station_name
+      Go live date: date_installed
+
+    trip_fields:
+      duration: duration_s
+      start_time: time_start
+      end_time: time_end
+      start_station_id: start_station_short_name
+      end_station_id: end station_short_name
+      start_lat: start_station_latitude
+      start_lon: start_station_longitude
+      end_lat: end_station_latitude
+      end_lon: end_station_longitude
+      bike_id: bike_name
+      passholder_type: customer_type
+
 
 
 weather:
