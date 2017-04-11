@@ -2,7 +2,7 @@
     Database model.
 """
 
-from pygrametl.tables import Dimension, FactTable
+from pygrametl.tables import Dimension, FactTable, CachedDimension
 from pygrametl import ConnectionWrapper
 import pygrametl
 from dateutil import parser
@@ -11,13 +11,13 @@ from util import util
 
 class DW:
 
-
     def get_db_connection(self):
         """
         Returns the existing database connection.
         :return: database connection wrapper
         """
         return self.__targetconnection
+
 
     def __init__(self):
         self.start_station_dimension = None
@@ -44,8 +44,15 @@ class DW:
         )
 
         # Stations
+        
+        self.station_dimension = CachedDimension(
+            name='station',
+            key='station_id',
+            attributes=['system_id', 'station_short_name', 'station_name', 'station_latitude',
+                        'station_longitude', 'station_capacity'],
+            lookupatts=['system_id', 'station_short_name'])
 
-        self.start_station_dimension = Dimension(
+        self.start_station_dimension = CachedDimension(
             name='start_station',
             key='start_station_id',
             attributes=['system_id', 'start_station_short_name', 'start_station_name', 'start_station_latitude',
@@ -53,7 +60,7 @@ class DW:
             lookupatts=['system_id', 'start_station_short_name']
         )
         
-        self.end_station_dimension = Dimension(
+        self.end_station_dimension = CachedDimension(
             name='end_station',
             key='end_station_id',
             attributes=['system_id', 'end_station_short_name', 'end_station_name', 'end_station_latitude',
@@ -63,7 +70,7 @@ class DW:
 
         # Trip dates and times
 
-        self.start_date_dimension = Dimension(
+        self.start_date_dimension = CachedDimension(
             name='start_date',
             key='start_date_id',
             attributes=['start_year', 'start_month', 'start_day', 'start_day_of_week', 'start_date_string'],
@@ -71,7 +78,7 @@ class DW:
             rowexpander=start_date_row_expander
         )
 
-        self.end_date_dimension = Dimension(
+        self.end_date_dimension = CachedDimension(
             name='end_date',
             key='end_date_id',
             attributes=['end_year', 'end_month', 'end_day', 'end_day_of_week', 'end_date_string'],
@@ -79,7 +86,7 @@ class DW:
             rowexpander=end_date_row_expander
         )
 
-        self.start_time_dimension = Dimension(
+        self.start_time_dimension = CachedDimension(
             name='start_time',
             key='start_time_id',
             attributes=['start_hour', 'start_minute', 'start_time_string', 'start_time_of_day'],
@@ -87,7 +94,7 @@ class DW:
             rowexpander=start_time_row_expander
         )
 
-        self.end_time_dimension = Dimension(
+        self.end_time_dimension = CachedDimension(
             name='end_time',
             key='end_time_id',
             attributes=['end_hour', 'end_minute', 'end_time_string', 'end_time_of_day'],
@@ -112,14 +119,15 @@ class DW:
             keyrefs=['system_id', 'weather_year', 'weather_month', 'weather_day']
         )
 
-        self.bike_dimension = Dimension(
+        self.bike_dimension = CachedDimension(
             name='bikes',
             key='bike_id',
             attributes=['system_id', 'bike_name'],
-            lookupatts=['system_id', 'bike_name']
+            lookupatts=['system_id', 'bike_name'],
+            defaultidvalue=-1
         )
 
-        self.customer_gender_dimension = Dimension(
+        self.customer_gender_dimension = CachedDimension(
             name='customer_gender',
             key='customer_gender_id',
             attributes=['customer_gender'],
@@ -127,7 +135,7 @@ class DW:
             defaultidvalue=-1
         )
 
-        self.customer_birthyear_dimension = Dimension(
+        self.customer_birthyear_dimension = CachedDimension(
             name='customer_birthyear',
             key='customer_birthyear_id',
             attributes=['customer_birthyear'],
@@ -135,7 +143,7 @@ class DW:
             defaultidvalue=-1
         )
 
-        self.customer_type_dimension = Dimension(
+        self.customer_type_dimension = CachedDimension(
             name='customer_type',
             key='customer_type_id',
             attributes=['customer_type'],
@@ -144,28 +152,28 @@ class DW:
         )
 
     # # Station status data
-    # station_status__date_dimension = Dimension(
+    # station_status__date_dimension = CachedDimension(
     #     name='station_status_date',
     #     key='station_status_id',
     #     attributes=['station_status_year', 'station_status_month', 'station_status_day', 'station_status_day_of_week'],
     #     lookupatts=['station_status_year', 'station_status_month', 'station_status_day']
     # )
     #
-    # station_status_time_dimension = Dimension(
+    # station_status_time_dimension = CachedDimension(
     #     name='station_status_time',
     #     key='station_status_time_id',
     #     attributes=['station_status_hour', 'station_status_minute'],
     #     lookupatts=['station_status_hour', 'station_status_minute']
     # )
     #
-    # station_status_station_station_dimension = Dimension(
+    # station_status_station_station_dimension = CachedDimension(
     #     name='station_status_station',
     #     key='station_status_station_id',
     #     attributes=['station_status_station_system_id', 'station_status_station_short_name', 'station_status_station_name', 'station_status_station_latitude', 'station_status_station_longitude', 'station_status_station_elevation', 'station_status_station_capacity'],
     #     lookupatts=['station_status_station_system_id', 'station_status_station_short_name']
     # )
     #
-    # station_status_system_dimension = Dimension(
+    # station_status_system_dimension = CachedDimension(
     #     name='station_status_system',
     #     key='station_status_system_dimension_id',
     #     attributes=['station_status_system_name'],

@@ -3,6 +3,17 @@ create table system(
     system_name text
 );
 
+create table station(
+    station_id integer primary key,
+    system_id text not null,
+    short_name text not null,
+    name text not null,
+    latitude real not null,
+    longitude real not null,
+    elevation real,
+    capacity integer
+);
+
 create table start_station(
     start_station_id integer primary key,
     system_id text not null,
@@ -23,17 +34,6 @@ create table end_station(
     end_station_longitude real not null,
     end_station_elevation real,
     end_station_capacity integer
-);
-
-create table station(
-    bike_station_id integer primary key,
-    system_id text not null,
-    short_name text not null,
-    name text not null,
-    latitude real not null,
-    longitude real not null,
-    elevation real,
-    capacity integer
 );
 
 create table start_date(
