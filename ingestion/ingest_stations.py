@@ -8,10 +8,12 @@ from model.DW import DW
 from settings import settings
 
 
+dw = DW()
+
+
 def main():
     cfg = settings.get_config()
     data_dir = os.path.join(cfg['ingestion_settings']['data_directory'])
-    dw = DW()
 
     for source in cfg['datasources'].keys():
         stations_dir = os.path.join(data_dir, source, 'stations')
@@ -29,28 +31,29 @@ def main():
 
                         for row in station_data:
                             fix_mappings(row, mappings)
-                            if 'capacity' not in row.keys():
-                                row['capacity'] = -1
-                            row['system_name'] = source
-                            row['system_id'] = dw.system_dimension.ensure(row)
+                            if 'station_id' in row.keys():
+                                if 'capacity' not in row.keys():
+                                    row['capacity'] = -1
+                                row['system_name'] = source
+                                row['system_id'] = dw.system_dimension.ensure(row)
+                                insert_missing_fields(row, dw)
 
-                            dw.start_station_dimension.ensure(row, namemapping={
-                                'start_station_short_name': 'short_name',
-                                'start_station_name': 'name',
-                                'start_station_longitude': 'longitude',
-                                'start_station_latitude': 'latitude',
-                                'start_station_capacity': 'capacity'
-                            })
+                                dw.start_station_dimension.ensure(row, namemapping={
+                                    'start_station_short_name': 'short_name',
+                                    'start_station_name': 'name',
+                                    'start_station_longitude': 'longitude',
+                                    'start_station_latitude': 'latitude',
+                                    'start_station_capacity': 'capacity'
+                                })
 
-                            dw.end_station_dimension.ensure(row, namemapping={
-                                'end_station_short_name': 'short_name',
-                                'end_station_name': 'name',
-                                'end_station_longitude': 'longitude',
-                                'end_station_latitude': 'latitude',
-                                'end_station_capacity': 'capacity'
-                            })
-
-                        dw.get_db_connection().commit()
+                                dw.end_station_dimension.ensure(row, namemapping={
+                                    'end_station_short_name': 'short_name',
+                                    'end_station_name': 'name',
+                                    'end_station_longitude': 'longitude',
+                                    'end_station_latitude': 'latitude',
+                                    'end_station_capacity': 'capacity'
+                                })
+                            dw.get_db_connection().commit()
 
 
 def fix_mappings(row, mappings):
@@ -69,5 +72,19 @@ def fix_mappings(row, mappings):
     for k in mappings:
         if k in row.keys():
             row[mappings[k]] = row.pop(k)
+
+
+def insert_missing_fields(row, dw):
+    """
+    Inserts missing keyrefs.
+
+    Bike share systems do not include all fields in their data. This method inserts
+    keys for missing lookuprefs in the trips fact table.
+    :param row: data row
+    :return: updates the row in place
+    """
+    for k in dw.station_dimension.attributes:
+        if k not in row:
+            row[k] = None
 
 if __name__ == "__main__": main()
