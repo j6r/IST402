@@ -8,8 +8,8 @@ create table station(
     system_id text not null,
     short_name text not null,
     name text not null,
-    latitude real not null,
-    longitude real not null,
+    latitude real,
+    longitude real,
     elevation real,
     capacity integer
 );
@@ -19,8 +19,8 @@ create table start_station(
     system_id text not null,
     start_station_short_name text not null,
     start_station_name text not null,
-    start_station_latitude real not null,
-    start_station_longitude real not null,
+    start_station_latitude real,
+    start_station_longitude real,
     start_station_elevation real,
     start_station_capacity integer
 );
@@ -30,8 +30,8 @@ create table end_station(
     system_id text not null,
     end_station_short_name text not null,
     end_station_name text not null,
-    end_station_latitude real not null,
-    end_station_longitude real not null,
+    end_station_latitude real,
+    end_station_longitude real,
     end_station_elevation real,
     end_station_capacity integer
 );

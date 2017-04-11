@@ -36,24 +36,40 @@ def main():
                                     row['capacity'] = -1
                                 row['system_name'] = source
                                 row['system_id'] = dw.system_dimension.ensure(row)
-                                insert_missing_fields(row, dw)
+                                insert_missing_fields(row)
+                                insert_station_dimensions(row)
 
-                                dw.start_station_dimension.ensure(row, namemapping={
-                                    'start_station_short_name': 'short_name',
-                                    'start_station_name': 'name',
-                                    'start_station_longitude': 'longitude',
-                                    'start_station_latitude': 'latitude',
-                                    'start_station_capacity': 'capacity'
-                                })
 
-                                dw.end_station_dimension.ensure(row, namemapping={
-                                    'end_station_short_name': 'short_name',
-                                    'end_station_name': 'name',
-                                    'end_station_longitude': 'longitude',
-                                    'end_station_latitude': 'latitude',
-                                    'end_station_capacity': 'capacity'
-                                })
-                            dw.get_db_connection().commit()
+    # HealthyRide is missing a station
+    row = {
+        'short_name': 1050,
+        'name': 'Healthy Ride Hub',
+        'system_name': 'healthyride'
+    }
+    row['system_id'] = dw.system_dimension.ensure(row)
+    insert_missing_fields(row)
+    insert_station_dimensions(row)
+
+
+def insert_station_dimensions(row):
+
+    dw.station_dimension.ensure(row)
+
+    dw.start_station_dimension.ensure(row, namemapping={
+        'start_station_short_name': 'short_name',
+        'start_station_name': 'name',
+        'start_station_longitude': 'longitude',
+        'start_station_latitude': 'latitude',
+        'start_station_capacity': 'capacity'
+    })
+
+    dw.end_station_dimension.ensure(row, namemapping={
+        'end_station_short_name': 'short_name',
+        'end_station_name': 'name',
+        'end_station_longitude': 'longitude',
+        'end_station_latitude': 'latitude',
+        'end_station_capacity': 'capacity'
+    })
 
 
 def fix_mappings(row, mappings):
@@ -74,7 +90,7 @@ def fix_mappings(row, mappings):
             row[mappings[k]] = row.pop(k)
 
 
-def insert_missing_fields(row, dw):
+def insert_missing_fields(row):
     """
     Inserts missing keyrefs.
 
