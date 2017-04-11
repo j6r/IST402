@@ -48,9 +48,9 @@ class DW:
         self.station_dimension = CachedDimension(
             name='station',
             key='station_id',
-            attributes=['system_id', 'station_short_name', 'station_name', 'station_latitude',
-                        'station_longitude', 'station_capacity'],
-            lookupatts=['system_id', 'station_short_name'])
+            attributes=['system_id', 'short_name', 'name', 'latitude',
+                        'longitude', 'capacity'],
+            lookupatts=['system_id', 'short_name'])
 
         self.start_station_dimension = CachedDimension(
             name='start_station',
@@ -131,24 +131,21 @@ class DW:
             name='customer_gender',
             key='customer_gender_id',
             attributes=['customer_gender'],
-            lookupatts=['customer_gender'],
-            defaultidvalue=-1
+            lookupatts=['customer_gender']
         )
 
         self.customer_birthyear_dimension = CachedDimension(
             name='customer_birthyear',
             key='customer_birthyear_id',
             attributes=['customer_birthyear'],
-            lookupatts=['customer_birthyear'],
-            defaultidvalue=-1
+            lookupatts=['customer_birthyear']
         )
 
         self.customer_type_dimension = CachedDimension(
             name='customer_type',
             key='customer_type_id',
             attributes=['customer_type'],
-            lookupatts=['customer_type'],
-            defaultidvalue=-1
+            lookupatts=['customer_type']
         )
 
     # # Station status data

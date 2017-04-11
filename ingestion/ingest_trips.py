@@ -4,6 +4,7 @@
     Ingest trip data into the staging database.
 """
 
+import csv
 import logging
 import os
 import time
@@ -37,8 +38,7 @@ def main():
     overall_row_count = 0
 
     # for each system in the config file
-    # for source in cfg['datasources'].keys():
-    for source in ['healthyride']:
+    for source in cfg['datasources'].keys():
         trip_dir = os.path.join(data_dir, source, cfg['ingestion_settings']['trips_directory'])
         mappings = cfg['datasources'][source]['trip_fields']
 
@@ -94,6 +94,9 @@ def main():
                                 except (ValueError, KeyError) as e:
                                     logger.warning('\nFailed to parse row {} in file {}\n\n{}'.format(
                                                   file_rowcount, file_rowcount, row))
+                                    with open(cfg['bad_data_csv'], 'a') as bdc:
+                                        out = csv.writer(bdc)
+                                        out.writerow(row)
 
                     logger.info('\nCompleted processing ' + file)
                     log_time_row(file_start_time, file_rowcount)
