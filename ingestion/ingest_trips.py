@@ -13,21 +13,28 @@ from settings import settings
 
 cfg = settings.get_config()
 dw = DW()
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename='/Users/redjen/Desktop/trips_ingestion.log', level=logging.DEBUG)
 
 
 def main():
 
     data_dir = os.path.join(cfg['ingestion_settings']['data_directory'])
 
+    overall_start_time = time.time()
+    overall_row_count = 0
+
     # for each system in the config file
-    # for source in cfg['datasources'].keys():
-    for source in ['healthyride']:
+    for source in cfg['datasources'].keys():
         trip_dir = os.path.join(data_dir, source, cfg['ingestion_settings']['trips_directory'])
         mappings = cfg['datasources'][source]['trip_fields']
 
         # if the system's trip directory is present
         if os.path.isdir(trip_dir):
+
+            logging.info('\n--------------------------------------------------' +
+                         '\nProcessing trip data for ' + source)
+            source_start_time = time.time()
+            source_rowcout = 0
 
             # for every file in the trip directory
             for file in os.listdir(trip_dir):
@@ -40,6 +47,11 @@ def main():
                             data = CSVSource(fh)
                             logging.info("Processing " + file)
 
+                            file_rowcount = 0
+                            file_start_time = time.time()
+                            set_rowcount = 0
+                            set_start_time = time.time()
+
                             # Process each row
                             for row in data:
                                 row['system_name'] = source
@@ -47,20 +59,36 @@ def main():
 
                                 fix_mappings(row, mappings)
                                 insert_datetime_dimensions(row)
-                                # insert_missing_fields(row)
+                                insert_missing_fields(row)
                                 insert_customer_dimensions(row)
+
                                 row['bike_id'] = dw.bike_dimension.ensure(row)
                                 row['start_station_id'] = dw.start_station_dimension.ensure(row)
                                 row['end_station_id'] = dw.end_station_dimension.ensure(row)
 
                                 dw.trip_fact_table.insert(row)
+                                set_rowcount += 1
+                                file_rowcount += 1
+                                source_rowcout += 1
+                                overall_row_count += 1
 
-                            logging.info('Completed processing ' + file)
-                            dw.get_db_connection().commit()
+                                if set_rowcount == 1000:
+                                    log_time_row(set_start_time, set_rowcount)
+                                    set_rowcount = 0
+                                    set_start_time = time.time()
+
+                            logging.info('\nCompleted processing ' + file)
+                            log_time_row(file_start_time, file_rowcount)
 
                 except Exception as e:
                     logging.exception('Exception occurred while parsing: ' + file,
                                       exc_info=True)
+
+            logging.info('\nFinished processing ' + source)
+            log_time_row(source_rowcout, source_start_time)
+
+    logging.info('\n\n\nCompleted ingestion of trip data')
+    log_time_row(overall_start_time, overall_row_count)
 
 
 def insert_datetime_dimensions(row):
@@ -127,6 +155,14 @@ def insert_missing_fields(row):
     for k in dw.trip_fact_table.keyrefs:
         if k not in row:
             row[k] = -1
+
+
+def log_time_row(time_begin, num_rows):
+    elapsed = time.time() - time_begin
+    avg_row = elapsed / num_rows
+    logging.info(
+        "Processed {:d} rows, {:.2f} s, {:.4f} per row".format(num_rows, elapsed, avg_row)
+    )
 
 
 if __name__ == '__main__': main()
