@@ -60,14 +60,6 @@ class DW:
                         'end_station_longitude', 'end_station_capacity'],
             lookupatts=['system_id', 'end_station_short_name']
         )
-        
-        self.station_dimension = Dimension(
-            name='station',
-            key='bike_station_id',
-            attributes=['system_id', 'short_name', 'name', 'latitude',
-                        'longitude', 'capacity'],
-            lookupatts=['system_id', 'short_name']
-        )
 
         # Trip dates and times
 
