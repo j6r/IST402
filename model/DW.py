@@ -4,7 +4,6 @@
 
 from pygrametl.tables import Dimension, FactTable, CachedDimension
 from pygrametl import ConnectionWrapper
-import pygrametl
 from dateutil import parser
 from util import util
 
@@ -20,9 +19,6 @@ class DW:
 
 
     def __init__(self):
-        self.start_station_dimension = None
-        self.end_station_dimension = None
-
         db_conn = util.get_database_connection()
         self.__targetconnection = ConnectionWrapper(connection=db_conn)
         self.__create_tables()
@@ -36,7 +32,7 @@ class DW:
     def __create_tables(self):
 
         # Systems
-        self.system_dimension = Dimension(
+        self.system_dimension = CachedDimension(
             name='system',
             key='system_id',
             attributes=['system_name'],
@@ -57,7 +53,8 @@ class DW:
             key='start_station_id',
             attributes=['system_id', 'start_station_short_name', 'start_station_name', 'start_station_latitude',
                         'start_station_longitude', 'start_station_capacity'],
-            lookupatts=['system_id', 'start_station_short_name']
+            lookupatts=['system_id', 'start_station_short_name'],
+            rowexpander=start_station_missing_data_expander
         )
         
         self.end_station_dimension = CachedDimension(
@@ -65,7 +62,8 @@ class DW:
             key='end_station_id',
             attributes=['system_id', 'end_station_short_name', 'end_station_name', 'end_station_latitude',
                         'end_station_longitude', 'end_station_capacity'],
-            lookupatts=['system_id', 'end_station_short_name']
+            lookupatts=['system_id', 'end_station_short_name'],
+            rowexpander=end_station_missing_data_expander
         )
 
         # Trip dates and times
@@ -220,6 +218,20 @@ def end_time_row_expander(row, namemapping):
     return row
 
 
+def start_station_missing_data_expander(row, namemapping):
+    for attr in ['start_station_name', 'start_station_latitude', 'start_station_longitude', 'start_station_capacity']:
+        if attr not in row.keys():
+            row['attr'] = ''
+    return row
+
+
+def end_station_missing_data_expander(row, namemapping):
+    for attr in ['end_station_name', 'end_station_latitude', 'end_station_longitude', 'end_station_capacity']:
+        if attr not in row.keys():
+            row['attr'] = ''
+    return row
+
+
 def get_time_of_day(hour):
     """
     Determines the time of day by hour
@@ -234,5 +246,3 @@ def get_time_of_day(hour):
         return 'afternoon'
     else:
         return 'evening'
-
-

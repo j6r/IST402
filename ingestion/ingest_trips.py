@@ -46,9 +46,9 @@ def main():
         if os.path.isdir(trip_dir):
 
             logger.info('\n--------------------------------------------------' +
-                         '\nProcessing trip data for ' + source)
+                        '\nProcessing trip data for ' + source)
             source_start_time = time.time()
-            source_rowcout = 0
+            source_rowcount = 0
 
             # for every file in the trip directory
             for file in os.listdir(trip_dir):
@@ -83,7 +83,7 @@ def main():
                                     insert_missing_fields(row)
                                     set_rowcount += 1
                                     file_rowcount += 1
-                                    source_rowcout += 1
+                                    source_rowcount += 1
                                     overall_row_count += 1
                                     dw.trip_fact_table.insert(row)
                                     if set_rowcount == 1000:
@@ -95,14 +95,14 @@ def main():
                                     logger.warning('\nFailed to parse row {} in file {}\n\n{}'.format(
                                                   file_rowcount, file_rowcount, row))
                                     with open(cfg['bad_data_csv'], 'a') as bdc:
-                                        out = csv.writer(bdc)
+                                        out = csv.DictWriter(bdc, fieldnames=row.keys())
                                         out.writerow(row)
 
                     logger.info('\nCompleted processing ' + file)
                     log_time_row(file_start_time, file_rowcount)
 
             logger.info('\nFinished processing ' + source)
-            log_time_row(source_start_time, source_rowcout)
+            log_time_row(source_start_time, source_rowcount)
 
     logger.info('\n\n\nCompleted ingestion of trip data')
     log_time_row(overall_start_time, overall_row_count)
