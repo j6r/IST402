@@ -5,6 +5,7 @@ Ingests the Bay Area Bike Share system status data
 """
 
 import os
+import time
 
 from dateutil import parser
 from pygrametl.datasources import CSVSource
@@ -18,12 +19,20 @@ DATA_DIR = os.path.join(cfg['ingestion_settings']['data_directory'], 'babs', 'st
 
 
 def main():
+    overall_start_time = time.time()
+    overall_row_count = 0
+
     system_id = dw.system_dimension.lookup({'system_name': 'babs'})
     for file in os.listdir(DATA_DIR):
         if file.endswith('.csv'):
-            print('Processing ' + file)
+            print(format('\nProcessing ', file))
             with open(os.path.join(DATA_DIR, file), 'r') as fh:
                 data = CSVSource(fh)
+
+                file_row_count = 0
+                file_start_time = time.time()
+                set_row_count = 0
+                set_start_time = time.time()
 
                 for row in data:
                     row['system_id'] = system_id
@@ -37,6 +46,20 @@ def main():
                         print(row)
                         print()
 
+                    set_row_count += 1
+                    file_row_count +=1
+                    overall_row_count += 1
+                    if set_row_count == 1000:
+                        log_time_row(set_start_time, set_row_count)
+                        set_start_time = time.time()
+                        set_row_count = 0
+
+                print(format('\nFinished processing {}', file))
+                log_time_row(file_start_time, file_row_count)
+                print('\n--------------------------------------------------\n\n')
+
+    print('\n\nCompleted system status ingestion')
+    log_time_row(overall_start_time, overall_row_count)
 
 def insert_datetime_dimensions(row):
     """
@@ -53,5 +76,11 @@ def insert_datetime_dimensions(row):
     # update dimensions
     row['start_date_id'] = dw.start_date_dimension.ensure(row)
     row['start_time_id'] = dw.start_time_dimension.ensure(row)
+
+
+def log_time_row(time_begin, num_rows):
+    elapsed = time.time() - time_begin
+    avg_row = elapsed / num_rows
+    print(format('{:d} rows processed in {:.4f}s, {:.4f}s per row'), num_rows, elapsed, avg_row)
 
 if __name__ == '__main__': main()
