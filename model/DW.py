@@ -46,7 +46,8 @@ class DW:
             key='station_id',
             attributes=['system_id', 'short_name', 'name', 'latitude',
                         'longitude', 'capacity'],
-            lookupatts=['system_id', 'short_name'])
+            lookupatts=['system_id', 'short_name'],
+            defaultidvalue=-1)
 
         self.start_station_dimension = CachedDimension(
             name='start_station',
@@ -146,40 +147,12 @@ class DW:
             lookupatts=['customer_type']
         )
 
-    # # Station status data
-    # station_status__date_dimension = CachedDimension(
-    #     name='station_status_date',
-    #     key='station_status_id',
-    #     attributes=['station_status_year', 'station_status_month', 'station_status_day', 'station_status_day_of_week'],
-    #     lookupatts=['station_status_year', 'station_status_month', 'station_status_day']
-    # )
-    #
-    # station_status_time_dimension = CachedDimension(
-    #     name='station_status_time',
-    #     key='station_status_time_id',
-    #     attributes=['station_status_hour', 'station_status_minute'],
-    #     lookupatts=['station_status_hour', 'station_status_minute']
-    # )
-    #
-    # station_status_station_station_dimension = CachedDimension(
-    #     name='station_status_station',
-    #     key='station_status_station_id',
-    #     attributes=['station_status_station_system_id', 'station_status_station_short_name', 'station_status_station_name', 'station_status_station_latitude', 'station_status_station_longitude', 'station_status_station_elevation', 'station_status_station_capacity'],
-    #     lookupatts=['station_status_station_system_id', 'station_status_station_short_name']
-    # )
-    #
-    # station_status_system_dimension = CachedDimension(
-    #     name='station_status_system',
-    #     key='station_status_system_dimension_id',
-    #     attributes=['station_status_system_name'],
-    #     lookupatts=['station_status_system_name']
-    # )
-    #
-    # station_status_fact_table = FactTable(
-    #     name='station_status',
-    #     key='station_status_id',
-    #     keyrefs=['station_status_date_id', 'station_status_time_id', 'station_status_station_id']
-    # )
+    # Station status
+        self.station_status_fact_table = FactTable(
+            name='station_status',
+            keyrefs=['system_id', 'station_id', 'start_date_id', 'start_time_id'],
+            measures=['bikes_available', 'docks_available']
+        )
 
 
 def end_date_row_expander(row, namemapping):

@@ -126,6 +126,7 @@ datasources:
 
   babs:
     system_id: babs
+    weather_station: 'GHCND:USW00023234'
 
     station_fields:
       station_id: short_name

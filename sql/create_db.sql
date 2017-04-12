@@ -190,3 +190,18 @@ from trips t left join system s on t.system_id=s.system_id
     left join start_date sd on t.start_date_id=sd.start_date_id
     left join weather w on t.system_id=w.system_id and sd.start_date_string=w.weather_date_string
 group by t.start_station_id, t.end_station_id, t.start_date_id;
+
+
+
+/*
+ * Station status data
+ */
+
+create table station_status(
+    system_id integer,
+    station_id integer,
+    start_date_id integer,
+    start_time_id integer,
+    bikes_available integer,
+    docks_available integer
+);

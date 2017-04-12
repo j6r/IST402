@@ -1,14 +1,13 @@
 """
 Ingests weather data and associates it with systems.
-
-Everything is hard-coded as it won't change and I'm short on time.
 """
 
 import os
 from pygrametl.datasources import CSVSource
 from model.DW import DW
+from settings import settings
 
-
+cfg = settings.get_config()
 dw = DW()
 field_mappings = {
     'precipitation_in': 'PRCP',
@@ -22,22 +21,26 @@ station_mappings = {
     'GHCND:USW00094290': 'pronto',
     'GHCND:USW00014762': 'healthyride',
     'GHCND:USW00014819': 'divvy',
-    'GHCND:USW00013882': 'bike_chattanooga'
+    'GHCND:USW00013882': 'bike_chattanooga',
+    'GHCND:USW00023234': 'babs'
 }
 
 
 def main():
 
-    data_source = os.path.join('/Users/redjen/Box Sync/IST402/data/raw/weather/weather.csv')
+    data_dir = os.path.join(cfg['weather']['weather_data_dir'])
+    for file in os.listdir(data_dir):
+            if file.endswith('.csv'):
 
-    with open(data_source, 'r') as fh:
-        data = CSVSource(fh)
+                with open(os.path.join(data_dir, file), 'r') as fh:
+                    data = CSVSource(fh)
 
-        for row in data:
-            row['system_name'] = station_mappings[row['STATION']]
-            row['system_id'] = dw.system_dimension.ensure(row)
-            insert_datetime(row)
-            dw.weather_fact_table.insert(row, namemapping=field_mappings)
+                    for row in data:
+                        if row['STATION'] in station_mappings.keys():
+                            row['system_name'] = station_mappings[row['STATION']]
+                            row['system_id'] = dw.system_dimension.ensure(row)
+                            insert_datetime(row)
+                            dw.weather_fact_table.insert(row, namemapping=field_mappings)
 
 
 def insert_datetime(row):
