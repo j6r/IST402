@@ -25,7 +25,7 @@ def main():
     system_id = dw.system_dimension.lookup({'system_name': 'babs'})
     for file in os.listdir(DATA_DIR):
         if file.endswith('.csv'):
-            print(format('\nProcessing ', file))
+            print('Processing ' + file)
             with open(os.path.join(DATA_DIR, file), 'r') as fh:
                 data = CSVSource(fh)
 
@@ -49,17 +49,18 @@ def main():
                     set_row_count += 1
                     file_row_count +=1
                     overall_row_count += 1
-                    if set_row_count == 1000:
+                    if set_row_count == 10000:
                         log_time_row(set_start_time, set_row_count)
                         set_start_time = time.time()
                         set_row_count = 0
 
-                print(format('\nFinished processing {}', file))
+                print('\nFinished processing {}'.format(file))
                 log_time_row(file_start_time, file_row_count)
                 print('\n--------------------------------------------------\n\n')
 
     print('\n\nCompleted system status ingestion')
     log_time_row(overall_start_time, overall_row_count)
+
 
 def insert_datetime_dimensions(row):
     """
@@ -81,6 +82,6 @@ def insert_datetime_dimensions(row):
 def log_time_row(time_begin, num_rows):
     elapsed = time.time() - time_begin
     avg_row = elapsed / num_rows
-    print(format('{:d} rows processed in {:.4f}s, {:.4f}s per row'), num_rows, elapsed, avg_row)
+    print("{:d} rows processed in {:.4f}s, {:.4f}s per row".format(num_rows, elapsed, avg_row))
 
 if __name__ == '__main__': main()
