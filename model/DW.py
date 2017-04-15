@@ -107,7 +107,7 @@ class DW:
             name='trips',
             measures=['duration_s'],
             keyrefs=['system_id', 'start_station_id', 'end_station_id', 'start_date_id', 'end_date_id', 'start_time_id',
-                     'end_time_id', 'customer_birthyear_id', 'customer_gender_id', 'customer_type_id', 'bike_id']
+                     'end_time_id', 'customer_birthyear_id', 'customer_gender_id', 'customer_type_id', 'bike_id', 'trip_category_id']
         )
 
         # weather fact table and date dimension
@@ -116,6 +116,12 @@ class DW:
             name='weather',
             measures=['precipitation_in', 'snow_in', 'temp_avg_f', 'temp_min_f', 'temp_max_f', 'wind_mph', 'weather_date_string','weather_year', 'weather_month', 'weather_day'],
             keyrefs=['system_id', 'weather_year', 'weather_month', 'weather_day']
+        )
+
+        self.trip_category = CachedDimension(
+            name='trip_category',
+            key='trip_category_id',
+            attributes=['trip_category']
         )
 
         self.bike_dimension = CachedDimension(

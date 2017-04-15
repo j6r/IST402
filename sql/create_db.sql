@@ -87,6 +87,7 @@ create table trips(
     customer_gender_id integer,
     bike_id integer,
     trip_category_id integer
+    elevation_diff_m real
 );
 
 create table trip_category(
