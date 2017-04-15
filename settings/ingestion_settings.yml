@@ -156,9 +156,9 @@ datasources:
     trip_fields:
       duration: duration_s
       start_time: time_start
-      end_time: time_end
+      end_time: time_stop
       start_station_id: start_station_short_name
-      end_station_id: end station_short_name
+      end_station_id: end_station_short_name
       start_lat: start_station_latitude
       start_lon: start_station_longitude
       end_lat: end_station_latitude
