@@ -85,7 +85,13 @@ create table trips(
     customer_birthyear_id integer,
     customer_type_id integer,
     customer_gender_id integer,
-    bike_id integer
+    bike_id integer,
+    trip_category_id integer
+);
+
+create table trip_category(
+    trip_category_id integer primary key,
+    trip_category text
 );
 
 create table customer_gender(
@@ -204,4 +210,52 @@ create table station_status(
     start_time_id integer,
     bikes_available integer,
     docks_available integer
+);
+
+
+/*
+ *  Indexes
+ */
+
+CREATE INDEX station_latlong_index ON station (
+    latitude,
+    longitude
+);
+
+CREATE INDEX start_station_latlong_index ON start_station (
+    start_station_latitude,
+    start_station_longitude
+);
+
+CREATE INDEX end_station_latlong_index ON end_station (
+    end_station_latitude,
+    end_station_longitude
+);
+
+CREATE INDEX end_date_index ON end_date (
+    end_year,
+    end_month,
+    end_day
+);
+
+CREATE INDEX end_time_index ON end_time (
+    end_hour,
+    end_minute
+);
+
+CREATE INDEX start_date_index ON start_date (
+    start_year,
+    start_month,
+    start_day
+);
+
+CREATE INDEX start_time_index ON start_time (
+    start_hour,
+    start_minute
+);
+
+CREATE INDEX weather_date_index ON weather (
+    weather_year,
+    weather_month,
+    weather_day
 );
