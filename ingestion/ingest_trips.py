@@ -17,6 +17,13 @@ from settings import settings
 cfg = settings.get_config()
 dw = DW()
 
+DEFAULTS = [
+    ('customer_gender', 'unspecified'),
+    ('customer_birthyear', -1),
+    ('customer_type', 'unspecified'),
+    ('trip_category', 'Round Trip')
+]
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s')
 logger = logging.getLogger()
