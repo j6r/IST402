@@ -32,6 +32,11 @@ UPDATE_END_STATION_QUERY = """
         WHERE end_station_latitude = ? AND end_station_longitude = ?
 """
 
+GET_TRIPS_QUERY = """
+    UPDATE trips
+
+"""
+
 
 def main():
 
@@ -59,6 +64,12 @@ def main():
             db_conn.commit()
         else:
             break
+
+    # Add elevation difference to trips
+
+
+
+
     db_conn.close()
 
 
