@@ -69,45 +69,30 @@ class DW:
 
         # Trip dates and times
 
-        self.start_date_dimension = CachedDimension(
-            name='start_date',
-            key='start_date_id',
-            attributes=['start_year', 'start_month', 'start_day', 'start_day_of_week', 'start_date_string'],
-            lookupatts=['start_date_string'],
-            rowexpander=start_date_row_expander
+        self.date_dimension = CachedDimension(
+            name='bdate',
+            key='date_id',
+            attributes=['year', 'month', 'day', 'day_of_week', 'date_string'],
+            lookupatts=['date_string'],
+            rowexpander=date_row_expander
         )
 
-        self.end_date_dimension = CachedDimension(
-            name='end_date',
-            key='end_date_id',
-            attributes=['end_year', 'end_month', 'end_day', 'end_day_of_week', 'end_date_string'],
-            lookupatts=['end_date_string'],
-            rowexpander=end_date_row_expander
+        self.time_dimension = CachedDimension(
+            name='btime',
+            key='time_id',
+            attributes=['hour', 'minute', 'time_string', 'time_of_day'],
+            lookupatts=['time_string'],
+            rowexpander=time_row_expander
         )
 
-        self.start_time_dimension = CachedDimension(
-            name='start_time',
-            key='start_time_id',
-            attributes=['start_hour', 'start_minute', 'start_time_string', 'start_time_of_day'],
-            lookupatts=['start_time_string'],
-            rowexpander=start_time_row_expander
-        )
-
-        self.end_time_dimension = CachedDimension(
-            name='end_time',
-            key='end_time_id',
-            attributes=['end_hour', 'end_minute', 'end_time_string', 'end_time_of_day'],
-            lookupatts=['end_time_string'],
-            rowexpander=end_time_row_expander
-        )
 
         # Trips
 
         self.trip_fact_table = FactTable(
             name='trips',
             measures=['duration_s'],
-            keyrefs=['system_id', 'start_station_id', 'end_station_id', 'start_date_id', 'end_date_id', 'start_time_id',
-                     'end_time_id', 'customer_birthyear_id', 'customer_gender_id', 'customer_type_id', 'bike_id', 'trip_category_id']
+            keyrefs=['system_id', 'start_station_id', 'end_station_id', 'date_id', 'time_id',
+                     'customer_birthyear_id', 'customer_gender_id', 'customer_type_id', 'bike_id', 'trip_category_id']
         )
 
         # weather fact table and date dimension
@@ -156,44 +141,26 @@ class DW:
     # Station status
         self.station_status_fact_table = FactTable(
             name='station_status',
-            keyrefs=['system_id', 'station_id', 'start_date_id', 'start_time_id'],
+            keyrefs=['system_id', 'station_id', 'date_id', 'time_id'],
             measures=['bikes_available', 'docks_available']
         )
+        
 
-
-def end_date_row_expander(row, namemapping):
-    d = parser.parse(row['end_date_string'])
-    row['end_year'] = d.year
-    row['end_month'] = d.month
-    row['end_day'] = d.day
-    row['end_day_of_week'] = d.isoweekday()
-    row['end_date_string'] = row['end_date_string']
+def date_row_expander(row, namemapping):
+    d = parser.parse(row['date_string'])
+    row['year'] = d.year
+    row['month'] = d.month
+    row['day'] = d.day
+    row['day_of_week'] = d.isoweekday()
+    row['date_string'] = row['date_string']
     return row
 
 
-def start_date_row_expander(row, namemapping):
-    d = parser.parse(row['start_date_string'])
-    row['start_year'] = d.year
-    row['start_month'] = d.month
-    row['start_day'] = d.day
-    row['start_day_of_week'] = d.isoweekday()
-    row['start_date_string'] = row['start_date_string']
-    return row
-
-
-def start_time_row_expander(row, namemapping):
-    d = parser.parse(row['start_time_string'])
-    row['start_hour'] = d.hour
-    row['start_minute'] = d.minute
-    row['start_time_of_day'] = get_time_of_day(row['start_hour'])
-    return row
-
-
-def end_time_row_expander(row, namemapping):
-    d = parser.parse(row['end_time_string'])
-    row['end_hour'] = d.hour
-    row['end_minute'] = d.minute
-    row['end_time_of_day'] = get_time_of_day(row['end_hour'])
+def time_row_expander(row, namemapping):
+    d = parser.parse(row['time_string'])
+    row['hour'] = d.hour
+    row['minute'] = d.minute
+    row['time_of_day'] = get_time_of_day(row['hour'])
     return row
 
 
