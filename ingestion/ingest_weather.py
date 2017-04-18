@@ -45,10 +45,8 @@ def main():
 
 def insert_datetime(row):
     # dateutil.parser doesn't detect this format
-    row['weather_year'] = row['DATE'][:4]
-    row['weather_month'] = row['DATE'][4:6]
-    row['weather_day'] = row['DATE'][6:8]
-    row['weather_date_string'] = row['weather_year'] + '-' + row['weather_month'] + '-' + row['weather_day']
+    row['date_string'] = row['DATE'][:4] + '-' +  row['DATE'][4:6] + '-' + row['DATE'][6:8]
+    row['date_id'] = dw.date_dimension.ensure(row)
 
 if __name__ == '__main__': main()
 

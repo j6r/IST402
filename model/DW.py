@@ -99,8 +99,8 @@ class DW:
 
         self.weather_fact_table = FactTable(
             name='weather',
-            measures=['precipitation_in', 'snow_in', 'temp_avg_f', 'temp_min_f', 'temp_max_f', 'wind_mph', 'weather_date_string','weather_year', 'weather_month', 'weather_day'],
-            keyrefs=['system_id', 'weather_year', 'weather_month', 'weather_day']
+            measures=['precipitation_in', 'snow_in', 'temp_avg_f', 'temp_min_f', 'temp_max_f', 'wind_mph'],
+            keyrefs=['system_id', 'date_id']
         )
 
         self.trip_category = CachedDimension(
