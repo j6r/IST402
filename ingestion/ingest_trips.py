@@ -123,18 +123,14 @@ def insert_datetime_dimensions(row):
     :return: none, row is updated
     """
 
-    d = parser.parse(row['time_start'])
-    row['start_date_string'] = d.strftime('%Y-%m-%d')
-    row['start_time_string'] = d.strftime('%H:%M')
-    d = parser.parse(row['time_stop'])
-    row['end_date_string'] = d.strftime('%Y-%m-%d')
-    row['end_time_string'] = d.strftime('%H:%M')
+    d = parser.parse(row['datetime'])
+    row['date_string'] = d.strftime('%Y-%m-%d')
+    row['time_string'] = d.strftime('%H:%M')
+
 
     # update dimensions
-    row['end_date_id'] = dw.end_date_dimension.ensure(row)
-    row['start_date_id'] = dw.start_date_dimension.ensure(row)
-    row['start_time_id'] = dw.start_time_dimension.ensure(row)
-    row['end_time_id'] = dw.end_time_dimension.ensure(row)
+    row['date_id'] = dw.date_dimension.ensure(row)
+    row['time_id'] = dw.time_dimension.ensure(row)
 
 
 def insert_customer_dimensions(row):
