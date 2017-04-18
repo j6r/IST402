@@ -33,8 +33,7 @@ datasources:
 
     trip_fields:
       trip_id: system_trip_id
-      starttime: time_start
-      stoptime: time_stop
+      starttime: datetime
       bikeid: bike_name
       tripduration: duration_s
       from_station_id: start_station_short_name
@@ -63,46 +62,45 @@ datasources:
 
     trip_fields:
       "Trip id": system_trip_id
-      Starttime: time_start
-      Stoptime: time_stop
+      Starttime: datetime
       Bikeid: bike_name
       Tripduration: duration_s
       From station id: start_station_short_name
       To station id: end_station_short_name
       Usertype: customer_type
 
-  divvy:
-    system_id: divvy
-    weather_station: 'GHCND:USW00014819'
-
-    station_fields:
-      id: short_name
-      dpcapacity: capacity
-      online_date: date_installed
-
-    trip_fields:
-      trip_id: system_trip_id
-      '"trip_id"': system_trip_id
-      starttime: time_start
-      '"starttime"': time_start
-      stoptime: time_stop
-      '"stoptime"': time_stop
-      bikeid: bike_name
-      '"bikeid"': bike_name
-      tripduration: duration_s
-      '"tripduration"': duration_s
-      from_station_name: start_station_name
-      '"from_station_name"': start_station_name
-      to_station_name: end_station_name
-      '"to_station_name"': end_station_name
-      from_station_id: start_station_short_name
-      to_station_id: end_station_short_name
-      birthday: customer_birthyear
-      birthyear: customer_birthyear
-      usertype: customer_type
-      '"usertype"': customer_type
-      gender: customer_gender
-      '"gender"': customer_gender
+#  divvy:
+#    system_id: divvy
+#    weather_station: 'GHCND:USW00014819'
+#
+#    station_fields:
+#      id: short_name
+#      dpcapacity: capacity
+#      online_date: date_installed
+#
+#    trip_fields:
+#      trip_id: system_trip_id
+#      '"trip_id"': system_trip_id
+#      starttime: time_start
+#      '"starttime"': time_start
+#      stoptime: time_stop
+#      '"stoptime"': time_stop
+#      bikeid: bike_name
+#      '"bikeid"': bike_name
+#      tripduration: duration_s
+#      '"tripduration"': duration_s
+#      from_station_name: start_station_name
+#      '"from_station_name"': start_station_name
+#      to_station_name: end_station_name
+#      '"to_station_name"': end_station_name
+#      from_station_id: start_station_short_name
+#      to_station_id: end_station_short_name
+#      birthday: customer_birthyear
+#      birthyear: customer_birthyear
+#      usertype: customer_type
+#      '"usertype"': customer_type
+#      gender: customer_gender
+#      '"gender"': customer_gender
 
   bike_chattanooga:
     system_id: bike_chattanooga
@@ -118,9 +116,8 @@ datasources:
       MemberType: usertype
       TripDurationSec: duration_s
       BikeID: bike_name
-      StartDateTime: time_start
+      StartDateTime: datetime
       StartStationID: start_station_short_name
-      EndDateTime: time_stop
       EndStationID: end_station_short_name
       'MemberType': customer_type
 
@@ -137,34 +134,32 @@ datasources:
 
     trip_fields:
       Duration: duration_s
-      Start Date: time_start
+      Start Date: datetime
       Start Terminal: start_station_short_name
-      End Date: time_stop
       End Terminal: end_station_short_name
       'Bike #': bike_name
       Subscription Type: customer_type
       Subscriber Type: customer_type
 
-  indego:
-    system_id: indego
-
-    station_fields:
-      Station ID: short_name
-      Station Name: name
-      Go live date: date_installed
-
-    trip_fields:
-      duration: duration_s
-      start_time: time_start
-      end_time: time_stop
-      start_station_id: start_station_short_name
-      end_station_id: end_station_short_name
-      start_lat: start_station_latitude
-      start_lon: start_station_longitude
-      end_lat: end_station_latitude
-      end_lon: end_station_longitude
-      bike_id: bike_name
-      passholder_type: customer_type
+#  indego:
+#    system_id: indego
+#
+#    station_fields:
+#      Station ID: short_name
+#      Station Name: name
+#      Go live date: date_installed
+#
+#    trip_fields:
+#      duration: duration_s
+#      start_time: date_time
+#      start_station_id: start_station_short_name
+#      end_station_id: end_station_short_name
+#      start_lat: start_station_latitude
+#      start_lon: start_station_longitude
+#      end_lat: end_station_latitude
+#      end_lon: end_station_longitude
+#      bike_id: bike_name
+#      passholder_type: customer_type
 
 
 
