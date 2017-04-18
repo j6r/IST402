@@ -53,7 +53,8 @@ def main():
     overall_row_count = 0
 
     # for each system in the config file
-    for source in cfg['datasources'].keys():
+    # for source in cfg['datasources'].keys():
+    for source in ['indego']:
         trip_dir = os.path.join(data_dir, source, cfg['ingestion_settings']['trips_directory'])
         mappings = cfg['datasources'][source]['trip_fields']
 
