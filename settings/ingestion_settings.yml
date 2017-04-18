@@ -149,8 +149,8 @@ datasources:
     system_id: indego
 
     station_fields:
-      Station ID: station_short_name
-      Station Name: station_name
+      Station ID: short_name
+      Station Name: name
       Go live date: date_installed
 
     trip_fields:

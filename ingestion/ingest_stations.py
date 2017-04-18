@@ -4,11 +4,17 @@
 
 import os
 from pygrametl.datasources import CSVSource
+from pygrametl import setdefaults
 from model.DW import DW
 from settings import settings
 
 
 dw = DW()
+DEFAULTS = [
+    ('latitude', None),
+    ('longitude', None),
+    ('capacity', None)
+]
 
 
 def main():
@@ -36,19 +42,8 @@ def main():
                                     row['capacity'] = -1
                                 row['system_name'] = source
                                 row['system_id'] = dw.system_dimension.ensure(row)
-                                insert_missing_fields(row)
+                                setdefaults(row, DEFAULTS)
                                 insert_station_dimensions(row)
-
-
-    # HealthyRide is missing a station
-    row = {
-        'short_name': 1050,
-        'name': 'Healthy Ride Hub',
-        'system_name': 'healthyride'
-    }
-    row['system_id'] = dw.system_dimension.ensure(row)
-    insert_missing_fields(row)
-    insert_station_dimensions(row)
 
 
 def insert_station_dimensions(row):
@@ -89,18 +84,5 @@ def fix_mappings(row, mappings):
         if k in row.keys():
             row[mappings[k]] = row.pop(k)
 
-
-def insert_missing_fields(row):
-    """
-    Inserts missing keyrefs.
-
-    Bike share systems do not include all fields in their data. This method inserts
-    keys for missing lookuprefs in the trips fact table.
-    :param row: data row
-    :return: updates the row in place
-    """
-    for k in dw.station_dimension.attributes:
-        if k not in row:
-            row[k] = None
 
 if __name__ == "__main__": main()
