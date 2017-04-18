@@ -36,9 +36,9 @@ def main():
 
                 for row in data:
                     row['system_id'] = system_id
-                    row['short_name'] = row.pop('station_id')
-                    row['station_id'] = dw.station_dimension.lookup(row)
-                    if row['station_id'] is not -1:
+                    row['start_station_short_name'] = row.pop('station_id')
+                    row['start_station_id'] = dw.start_station_dimension.lookup(row)
+                    if row['start_station_id'] is not -1:
                         insert_datetime_dimensions(row)
                         dw.station_status_fact_table.insert(row)
                     else:
@@ -71,12 +71,12 @@ def insert_datetime_dimensions(row):
     """
 
     d = parser.parse(timestr=row['time'])
-    row['start_date_string'] = d.strftime('%Y-%m-%d')
-    row['start_time_string'] = d.strftime('%H:%M')
+    row['date_string'] = d.strftime('%Y-%m-%d')
+    row['time_string'] = d.strftime('%H:%M')
 
     # update dimensions
-    row['start_date_id'] = dw.start_date_dimension.ensure(row)
-    row['start_time_id'] = dw.start_time_dimension.ensure(row)
+    row['date_id'] = dw.date_dimension.ensure(row)
+    row['time_id'] = dw.time_dimension.ensure(row)
 
 
 def log_time_row(time_begin, num_rows):

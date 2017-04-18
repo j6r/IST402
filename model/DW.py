@@ -133,7 +133,7 @@ class DW:
         # Station status
         self.station_status_fact_table = FactTable(
             name='station_status',
-            keyrefs=['system_id', 'station_id', 'date_id', 'time_id'],
+            keyrefs=['system_id', 'start_station_id', 'date_id', 'time_id'],
             measures=['bikes_available', 'docks_available']
         )
 

@@ -111,7 +111,7 @@ create table weather(
 
 create table station_status(
     system_id integer,
-    station_id integer,
+    start_station_id integer,
     date_id integer,
     time_id integer,
     bikes_available integer,
