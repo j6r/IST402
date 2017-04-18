@@ -141,25 +141,25 @@ datasources:
       Subscription Type: customer_type
       Subscriber Type: customer_type
 
-#  indego:
-#    system_id: indego
-#
-#    station_fields:
-#      Station ID: short_name
-#      Station Name: name
-#      Go live date: date_installed
-#
-#    trip_fields:
-#      duration: duration_s
-#      start_time: date_time
-#      start_station_id: start_station_short_name
-#      end_station_id: end_station_short_name
-#      start_lat: start_station_latitude
-#      start_lon: start_station_longitude
-#      end_lat: end_station_latitude
-#      end_lon: end_station_longitude
-#      bike_id: bike_name
-#      passholder_type: customer_type
+  indego:
+    system_id: indego
+
+    station_fields:
+      Station ID: short_name
+      Station Name: name
+      Go live date: date_installed
+
+    trip_fields:
+      duration: duration_s
+      start_time: datetime
+      start_station_id: start_station_short_name
+      end_station_id: end_station_short_name
+      start_lat: start_station_latitude
+      start_lon: start_station_longitude
+      end_lat: end_station_latitude
+      end_lon: end_station_longitude
+      bike_id: bike_name
+      passholder_type: customer_type
 
 
 

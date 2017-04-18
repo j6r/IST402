@@ -21,7 +21,15 @@ DEFAULTS = [
     ('customer_gender', 'unspecified'),
     ('customer_birthyear', -1),
     ('customer_type', 'unspecified'),
-    ('trip_category', 'Round Trip')
+    ('trip_category', 'Round Trip'),
+    ('start_station_name', 'unspecified'),
+    ('start_station_latitude', None),
+    ('start_station_longitude', None),
+    ('start_station_capacity', None),
+    ('end_station_name', 'unspecified'),
+    ('end_station_latitude', None),
+    ('end_station_longitude', None),
+    ('end_station_capacity', None)
 ]
 
 logging.basicConfig(level=logging.DEBUG,
@@ -45,7 +53,8 @@ def main():
     overall_row_count = 0
 
     # for each system in the config file
-    for source in cfg['datasources'].keys():
+    # for source in cfg['datasources'].keys():
+    for source in ['indego']:
         trip_dir = os.path.join(data_dir, source, cfg['ingestion_settings']['trips_directory'])
         mappings = cfg['datasources'][source]['trip_fields']
 
@@ -73,6 +82,7 @@ def main():
                         # Process each row
                         for row in data:
                             fix_mappings(row, mappings)
+                            pygrametl.setdefaults(row, DEFAULTS)
                             test = 'start_station_short_name' in row.keys()
 
                             if 'start_station_short_name' in row.keys():
@@ -82,12 +92,15 @@ def main():
                                     row['system_id'] = dw.system_dimension.ensure(row)
 
                                     insert_datetime_dimensions(row)
-                                    insert_customer_dimensions(row)
-                                    dw.start_station_dimension.ensure(row)
+
                                     row['bike_id'] = dw.bike_dimension.ensure(row)
                                     row['start_station_id'] = dw.start_station_dimension.ensure(row)
                                     row['end_station_id'] = dw.end_station_dimension.ensure(row)
-                                    insert_missing_fields(row)
+                                    row['trip_category_id'] = dw.trip_category.ensure(row)
+                                    row['customer_type_id'] = dw.customer_type_dimension.ensure(row)
+                                    row['customer_gender_id'] = dw.customer_type_dimension.ensure(row)
+                                    row['customer_birthyear_id'] = dw.customer_type_dimension.ensure(row)
+
                                     set_rowcount += 1
                                     file_rowcount += 1
                                     source_rowcount += 1
@@ -98,7 +111,7 @@ def main():
                                         set_rowcount = 0
                                         set_start_time = time.time()
 
-                                except (ValueError, KeyError) as e:
+                                except (IndentationError) as e:
                                     logger.warning('\nFailed to parse row {} in file {}\n\n{}'.format(
                                                   file_rowcount, file_rowcount, row))
                                     with open(cfg['bad_data_csv'], 'a') as bdc:
@@ -127,22 +140,9 @@ def insert_datetime_dimensions(row):
     row['date_string'] = d.strftime('%Y-%m-%d')
     row['time_string'] = d.strftime('%H:%M')
 
-
     # update dimensions
     row['date_id'] = dw.date_dimension.ensure(row)
     row['time_id'] = dw.time_dimension.ensure(row)
-
-
-def insert_customer_dimensions(row):
-    defaults = [
-        ('customer_gender', 'unspecified'),
-        ('customer_birthyear', -1),
-        ('customer_type', 'unspecified')
-    ]
-    pygrametl.setdefaults(row, defaults)
-    row['customer_gender_id'] = dw.customer_gender_dimension.ensure(row)
-    row['customer_birthyear_id'] = dw.customer_birthyear_dimension.ensure(row)
-    row['customer_type_id'] = dw.customer_type_dimension.ensure(row)
 
 
 def fix_mappings(row, mappings):
@@ -161,20 +161,6 @@ def fix_mappings(row, mappings):
     for k in mappings:
         if k in row.keys():
             row[mappings[k]] = row.pop(k)
-
-
-def insert_missing_fields(row):
-    """
-    Inserts missing keyrefs.
-
-    Bike share systems do not include all fields in their data. This method inserts
-    keys for missing lookuprefs in the trips fact table.
-    :param row: data row
-    :return: updates the row in place
-    """
-    for k in dw.trip_fact_table.keyrefs:
-        if k not in row:
-            row[k] = -1
 
 
 def log_time_row(time_begin, num_rows):
