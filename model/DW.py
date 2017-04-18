@@ -40,14 +40,6 @@ class DW:
         )
 
         # Stations
-        
-        self.station_dimension = CachedDimension(
-            name='station',
-            key='station_id',
-            attributes=['system_id', 'short_name', 'name', 'latitude',
-                        'longitude', 'capacity'],
-            lookupatts=['system_id', 'short_name'],
-            defaultidvalue=-1)
 
         self.start_station_dimension = CachedDimension(
             name='start_station',
@@ -138,13 +130,35 @@ class DW:
             lookupatts=['customer_type']
         )
 
-    # Station status
+        # Station status
         self.station_status_fact_table = FactTable(
             name='station_status',
             keyrefs=['system_id', 'station_id', 'date_id', 'time_id'],
             measures=['bikes_available', 'docks_available']
         )
-        
+
+        # Non-cached version of stations for use only with updating Indego stations.
+
+        self.start_station_noncached_dimension = Dimension(
+            name='start_station',
+            key='start_station_id',
+            attributes=['system_id', 'start_station_short_name', 'start_station_name', 'start_station_latitude',
+                        'start_station_longitude', 'start_station_capacity'],
+            lookupatts=['system_id', 'start_station_short_name'],
+            rowexpander=start_station_missing_data_expander,
+            defaultidvalue=-1
+        )
+
+        self.end_station_noncached_dimension = Dimension(
+            name='end_station',
+            key='end_station_id',
+            attributes=['system_id', 'end_station_short_name', 'end_station_name', 'end_station_latitude',
+                        'end_station_longitude', 'end_station_capacity'],
+            lookupatts=['system_id', 'end_station_short_name'],
+            rowexpander=end_station_missing_data_expander,
+            defaultidvalue=-1
+        )
+
 
 def date_row_expander(row, namemapping):
     d = parser.parse(row['date_string'])

@@ -3,17 +3,6 @@ create table system(
     system_name text
 );
 
-create table station(
-    station_id integer primary key,
-    system_id text not null,
-    short_name text not null,
-    name text not null,
-    latitude real,
-    longitude real,
-    elevation real,
-    capacity integer
-);
-
 create table start_station(
     start_station_id integer primary key,
     system_id text not null,
@@ -98,7 +87,7 @@ create table trips(
     customer_type_id integer,
     customer_gender_id integer,
     bike_id integer,
-    trip_category_id integer
+    trip_category_id integer,
     elevation_diff_m real
 );
 
@@ -133,11 +122,6 @@ create table station_status(
 /*
  *  Indexes
  */
-
-CREATE INDEX station_latlong_index ON station (
-    latitude,
-    longitude
-);
 
 CREATE INDEX start_station_latlong_index ON start_station (
     start_station_latitude,

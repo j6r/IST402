@@ -22,33 +22,32 @@ def main():
     data_dir = os.path.join(cfg['ingestion_settings']['data_directory'])
 
     for source in cfg['datasources'].keys():
-        stations_dir = os.path.join(data_dir, source, 'stations')
-        if os.path.isdir(stations_dir):
+        if source is not 'indego':
+            stations_dir = os.path.join(data_dir, source, 'stations')
+            if os.path.isdir(stations_dir):
 
-            mappings = cfg['datasources'][source]['station_fields']
+                mappings = cfg['datasources'][source]['station_fields']
 
-            for file in os.listdir(stations_dir):
-                if file.endswith('.csv'):
-                    print('Processing ' + source + ' ' + file)
+                for file in os.listdir(stations_dir):
+                    if file.endswith('.csv'):
+                        print('Processing ' + source + ' ' + file)
 
-                    with open(os.path.join(stations_dir, file), 'r') as fh:
+                        with open(os.path.join(stations_dir, file), 'r') as fh:
 
-                        station_data = CSVSource(fh)
+                            station_data = CSVSource(fh)
 
-                        for row in station_data:
-                            fix_mappings(row, mappings)
-                            if 'short_name' in row.keys():
-                                if 'capacity' not in row.keys():
-                                    row['capacity'] = -1
-                                row['system_name'] = source
-                                row['system_id'] = dw.system_dimension.ensure(row)
-                                setdefaults(row, DEFAULTS)
-                                insert_station_dimensions(row)
+                            for row in station_data:
+                                fix_mappings(row, mappings)
+                                if 'short_name' in row.keys():
+                                    if 'capacity' not in row.keys():
+                                        row['capacity'] = -1
+                                    row['system_name'] = source
+                                    row['system_id'] = dw.system_dimension.ensure(row)
+                                    setdefaults(row, DEFAULTS)
+                                    insert_station_dimensions(row)
 
 
 def insert_station_dimensions(row):
-
-    dw.station_dimension.ensure(row)
 
     dw.start_station_dimension.ensure(row, namemapping={
         'start_station_short_name': 'short_name',
