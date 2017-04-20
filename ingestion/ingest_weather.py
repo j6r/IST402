@@ -22,7 +22,8 @@ station_mappings = {
     'GHCND:USW00014762': 'healthyride',
     'GHCND:USW00014819': 'divvy',
     'GHCND:USW00013882': 'bike_chattanooga',
-    'GHCND:USW00023234': 'babs'
+    'GHCND:USW00023234': 'babs',
+    'GHCND:USW00013739': 'indego'
 }
 
 
