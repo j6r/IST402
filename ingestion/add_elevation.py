@@ -52,19 +52,19 @@ def main():
 
     db_conn = util.get_database_connection()
 
-    # while True:
-    #     stations = db_conn.execute(GET_START_STATIONS_QUERY).fetchall()
-    #     locations = list(map(lambda x: (x[1], x[2]), stations))
-    #     if len(locations) > 0:
-    #         location_results = elevation(gmaps, locations)
-    #         updates = []
-    #         for l, s in zip(location_results, stations):
-    #             updates.append((l['elevation'], s[1], s[2]))
-    #
-    #         db_conn.executemany(UPDATE_START_STATION_QUERY, updates)
-    #         db_conn.commit()
-    #     else:
-    #         break
+    while True:
+        stations = db_conn.execute(GET_START_STATIONS_QUERY).fetchall()
+        locations = list(map(lambda x: (x[1], x[2]), stations))
+        if len(locations) > 0:
+            location_results = elevation(gmaps, locations)
+            updates = []
+            for l, s in zip(location_results, stations):
+                updates.append((l['elevation'], s[1], s[2]))
+
+            db_conn.executemany(UPDATE_START_STATION_QUERY, updates)
+            db_conn.commit()
+        else:
+            break
 
     while True:
         stations = db_conn.execute(GET_END_STATIONS_QUERY).fetchall()
@@ -79,11 +79,6 @@ def main():
             db_conn.commit()
         else:
             break
-
-    # Add elevation difference to trips
-
-
-
 
     db_conn.close()
 
