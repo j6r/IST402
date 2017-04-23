@@ -15,7 +15,7 @@ get_data <- function() {
   return(df)
 }
 
-reduce_to_hours <- function(df) {
+reduce_to_hours <- function(df, stat = df$bikes_available, label = "bikes") {
   # Aggregates by hour and fills in missing values with the previous.
   #
   # Args:
@@ -27,7 +27,7 @@ reduce_to_hours <- function(df) {
   df1 <- df %>% 
     thicken('hour', by=timestamp()) %>% 
     group_by(timestamp_hour) %>%
-    summarise(hour_amount = min(bikes_available)) %>% 
+    summarise(hour_amount = min(stat)) %>% 
     pad() %>% 
     fill_by_value(hour_amount)
   names(df1) <- c("time", "bikes")
@@ -41,7 +41,8 @@ reduce_to_hours <- function(df) {
 
 
 df <- get_data()
-df_bikes <- reduce_to_hours(df)
+# df_bikes <- reduce_to_hours(df, stat = df$bikes_available, label = "bikes")
+df_docks <- reduce_to_hours(df, stat = df$docks_available, label = "docks")
 tser <- ts(df_bikes$bikes, frequency = 24, start = c(2015, 9))
 df_forecast <- HoltWinters(tser)
 # plot(df_forecast)
