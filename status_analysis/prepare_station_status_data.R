@@ -10,7 +10,7 @@ get_data <- function() {
   # Returns:
   #   The station data as a dataframe
   
-  df <- read.csv("station_197_extract.csv")
+  df <- read.csv("../data/station_197_extract.csv")
   df$timestamp<-as.POSIXct(df$timestamp,format="%Y-%m-%d %H:%M")
   return(df)
 }
@@ -44,6 +44,9 @@ df <- get_data()
 df_bikes <- reduce_to_hours(df)
 tser <- ts(df_bikes$bikes, frequency = 24, start = c(2015, 9))
 df_forecast <- HoltWinters(tser)
-plot(df_forecast)
+# plot(df_forecast)
+
+# Predicted bikes available
 pred <- predict(df_forecast, n.ahead = 24, level = .85)
+ggplot(data = df_pred, aes(x = as.numeric(row.names(df_pred)), y = df_pred$fit)) + geom_line() + ggtitle(label = "Predicted Bike Availability 9/1/2016") + xlab("Hour") + ylab("Bikes Available")
 
