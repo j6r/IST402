@@ -64,7 +64,10 @@ predd <- predict(hwd, n.ahead = 24, level = .85)
 # Join predictions and plot
 predicted <- data.frame(predb, predd)
 names(predicted) <- c("bikes", "docks")
+predicted$hour = rownames(predicted)
+predicted <- melt(predicted, id.vars = "hour")
 
-ggplot(data = predicted, aes(x = as.numeric(row.names(predicted)))) + 
-  geom_line(aes(y = predicted$bikes)) + geom_line(aes(y = predicted$docks)) +
-  ggtitle("Bike/dock availability 9/1/2016") + xlab("Hour") + ylab("Bikes/Docks")
+ggplot(data = predicted, aes(x = hour, y = value, group = variable, colour = variable)) + 
+  geom_line() + 
+  ggtitle("Bike/dock availability 9/1/2016") + 
+  xlab("Hour") + ylab("Bikes/Docks")
