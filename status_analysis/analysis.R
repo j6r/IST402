@@ -22,26 +22,33 @@ reduce_to_hours <- function(df) {
   #   df: dataframe containing station data
   #
   # Returns:
-  #   Dataframe with timestamp and min bikes available
+  #   Dataframe with timestamp, min bikes available, and min docks available
   
-  df1 <- df %>% 
+  dfb <- df %>% 
     thicken('hour', by=timestamp()) %>% 
     group_by(timestamp_hour) %>%
     summarise(hour_amount = min(bikes_available)) %>% 
     pad() %>% 
     fill_by_value(hour_amount)
-  names(df1) <- c("time", "bikes")
-  return(df1)
+  names(dfb) <- c("time", "bikes")
   
-  #  ggplot(df_bikes, aes(time, bikes)) + geom_point() +  geom_smooth() +
-  #    labs(x="Time", y="Bikes Available", title="Bike Availability July/August")
+  dfd <- df %>% 
+    thicken('hour', by=timestamp()) %>% 
+    group_by(timestamp_hour) %>%
+    summarise(hour_amount = min(docks_available)) %>% 
+    pad() %>% 
+    fill_by_value(hour_amount)
+  names(dfd) <- c("time", "docks")
+  
+  dfboth <- merge(dfb, dfd, by="time")
+  return(dfboth)
 }
 
 
 
 
 df <- get_data()
-df_bikes <- reduce_to_hours(df)
+df <- reduce_to_hours(df)
 tser <- ts(df_bikes$bikes, frequency = 24, start = c(2015, 9))
 df_forecast <- HoltWinters(tser)
 # plot(df_forecast)
