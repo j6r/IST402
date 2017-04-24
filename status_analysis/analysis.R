@@ -49,14 +49,22 @@ reduce_to_hours <- function(df) {
 
 df <- get_data()
 df <- reduce_to_hours(df)
-tser <- ts(df_bikes$bikes, frequency = 24, start = c(2015, 9))
-df_forecast <- HoltWinters(tser)
+
+# Bike prediction
+tsb <- ts(df$bikes, frequency = 24, start = c(2015, 9))
+hwb <- HoltWinters(tsb)
+predb <- predict(hwb, n.ahead = 24, level = .85)
 # plot(df_forecast)
 
-# Predicted bikes available
-df_pred <- predict(df_forecast, n.ahead = 24, level = .85)
+# Dock prediction
+tsd <- ts(df$docks, frequency = 24, start = c(2015, 9))
+hwd <- HoltWinters(tsd)
+predd <- predict(hwd, n.ahead = 24, level = .85)
 
-predicted <- as.data.frame(df_pred)
-names(predicted) <- c("bikes")
-ggplot(data = predicted, aes(x = as.numeric(row.names(predicted)), y = predicted$bikes)) + 
-  geom_line() + ggtitle("Bike/dock availability 9/1/2016") + xlab("Hour") + ylab("Bikes/Docks")
+# Join predictions and plot
+predicted <- data.frame(predb, predd)
+names(predicted) <- c("bikes", "docks")
+
+ggplot(data = predicted, aes(x = as.numeric(row.names(predicted)))) + 
+  geom_line(aes(y = predicted$bikes)) + geom_line(aes(y = predicted$docks)) +
+  ggtitle("Bike/dock availability 9/1/2016") + xlab("Hour") + ylab("Bikes/Docks")
