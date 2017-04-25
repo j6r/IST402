@@ -2,6 +2,7 @@ library(padr)
 library(ggplot2)
 library(dplyr)
 library(forecast)
+library(reshape2)
 
 
 get_data <- function() {
@@ -64,10 +65,10 @@ predd <- predict(hwd, n.ahead = 24, level = .85)
 # Join predictions and plot
 predicted <- data.frame(predb, predd)
 names(predicted) <- c("bikes", "docks")
-predicted$hour = rownames(predicted)
-predicted <- melt(predicted, id.vars = "hour")
+predicted$hour <- as.numeric(rownames(predicted))
+predictedm <- melt(predicted, id.vars = "hour")
 
-ggplot(data = predicted, aes(x = hour, y = value, group = variable, colour = variable)) + 
+ggplot(data = predictedm, aes(x = hour, y = value, group = variable, colour = variable)) + 
   geom_line() + 
   ggtitle("Bike/dock availability 9/1/2016") + 
   xlab("Hour") + ylab("Bikes/Docks")
