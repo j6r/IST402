@@ -43,7 +43,7 @@ reduce_to_hours <- function(df) {
     summarise(hour_amount = min(bikes_available)) %>% 
     pad() %>% 
     fill_by_value(hour_amount)
-  names(dfb) <- c("time", "bikes")
+  names(dfb) <- c("triptime", "bikes")
   
   dfd <- df %>% 
     thicken('hour', by=timestamp()) %>% 
@@ -51,14 +51,11 @@ reduce_to_hours <- function(df) {
     summarise(hour_amount = min(docks_available)) %>% 
     pad() %>% 
     fill_by_value(hour_amount)
-  names(dfd) <- c("time", "docks")
+  names(dfd) <- c("triptime", "docks")
   
-  dfboth <- merge(dfb, dfd, by="time")
+  dfboth <- merge(dfb, dfd, by="triptime")
   return(dfboth)
 }
-
-
-
 
 df <- get_data()
 df <- reduce_to_hours(df)
@@ -81,14 +78,21 @@ predictedm <- melt(predicted, id.vars = "hour")
 ```
 
 
+```{r echo=FALSE}
+ggplot(data = predictedm, aes(x = hour, y = value, group = variable, colour = variable)) + 
+  geom_line() + 
+  ggtitle("Bike/dock availability 9/1/2016") + 
+  xlab("Hour") + ylab("Bikes/Docks")
+
+
+
+```
+
+
 Bike Prediction Model
 ---------------------
 
 ```{r echo=FALSE}
-  
-    hwb$alpha
-
-
   plot(hwb)
 ```
 
@@ -96,10 +100,6 @@ Bike Prediction Model
 Dock Prediction Model
 ---------------------
 ```{r echo=FALSE}
-ggplot(data = predictedm, aes(x = hour, y = value, group = variable, colour = variable)) + 
-  geom_line() + 
-  ggtitle("Bike/dock availability 9/1/2016") + 
-  xlab("Hour") + ylab("Bikes/Docks")
-
+  plot(hwd)
 ```
 
