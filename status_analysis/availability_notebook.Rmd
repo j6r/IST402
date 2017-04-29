@@ -1,3 +1,15 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r pressure, echo=FALSE}
 library(padr)
 library(ggplot2)
 library(dplyr)
@@ -66,8 +78,28 @@ predicted <- data.frame(predb, predd)
 names(predicted) <- c("bikes", "docks")
 predicted$hour <- as.numeric(rownames(predicted))
 predictedm <- melt(predicted, id.vars = "hour")
+```
 
+
+Bike Prediction Model
+---------------------
+
+```{r echo=FALSE}
+  
+    hwb$alpha
+
+
+  plot(hwb)
+```
+
+
+Dock Prediction Model
+---------------------
+```{r echo=FALSE}
 ggplot(data = predictedm, aes(x = hour, y = value, group = variable, colour = variable)) + 
   geom_line() + 
   ggtitle("Bike/dock availability 9/1/2016") + 
   xlab("Hour") + ylab("Bikes/Docks")
+
+```
+
