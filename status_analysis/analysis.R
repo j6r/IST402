@@ -53,13 +53,13 @@ df <- reduce_to_hours(df)
 
 # Bike prediction
 tsb <- ts(df$bikes, frequency = 24, start = c(2015, 9))
-hwb <- HoltWinters(tsb)
+hwb <- HoltWinters(tsb, alpha = 0.2, beta = 0.15, gamma = 0.05)
 predb <- predict(hwb, n.ahead = 24, level = .85)
-# plot(df_forecast)
+plot(hwb)
 
 # Dock prediction
 tsd <- ts(df$docks, frequency = 24, start = c(2015, 9))
-hwd <- HoltWinters(tsd)
+hwd <- HoltWinters(tsd, alpha = 0.2, beta = 0.15, gamma = 0.05)
 predd <- predict(hwd, n.ahead = 24, level = .85)
 
 # Join predictions and plot
